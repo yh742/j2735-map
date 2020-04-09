@@ -1,12 +1,25 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles'
 import * as serviceWorker from './serviceWorker';
 
+import './index.css';
+import App from './App';
+import {NeueHaasGrotesk, NeueHaasGroteskBold} from './Font/Font'
+import CssBaseline from '@material-ui/core/CssBaseline'
+import {BrowserRouter} from 'react-router-dom'
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles'
 
 const theme = createMuiTheme({
+  typography: {
+    fontFamily: ['Neue Haas Grotesk'].join(','),
+  },
+  overrides: {
+    MuiCssBaseline: {
+      '@global': {
+        '@font-face': [NeueHaasGrotesk, NeueHaasGroteskBold],
+      },
+    },
+  },
   palette: {
     primary: {
       main: "#000000",
@@ -17,12 +30,14 @@ const theme = createMuiTheme({
   },
 });
 
-
 ReactDOM.render(
   <React.StrictMode>
-    <MuiThemeProvider theme={theme}>
-      <App />
-    </MuiThemeProvider>
+    <BrowserRouter>
+      <MuiThemeProvider theme={theme}>
+        <CssBaseline />
+        <App />
+      </MuiThemeProvider>
+    </BrowserRouter>
   </React.StrictMode>,
   document.getElementById('root')
 );

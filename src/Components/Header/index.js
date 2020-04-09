@@ -1,14 +1,35 @@
-import React, { useContext } from 'react'
-import { AppBar, Toolbar, IconButton, Typography } from '@material-ui/core'
+import React, { useState } from 'react'
+import clsx from 'clsx';
+
+import { AppBar, Toolbar, IconButton, Badge } from '@material-ui/core'
+import MenuIcon from '@material-ui/icons/Menu';
 import AssessmentIcon from '@material-ui/icons/Assessment';
 import { makeStyles } from '@material-ui/core/styles'
 import { ReactComponent as Logo } from "./logo.svg";
-import SettingsIcon from '@material-ui/icons/Settings';
-import SearchBar from './SearchBar/SearchBar';
-import HistoryIcon from '@material-ui/icons/History';
-import { MenuContext } from "../Store";
 
-const styles = makeStyles((theme) => ({
+
+const styles = drawerWidth => makeStyles((theme) => ({
+  appBar: {
+    zIndex: theme.zIndex.drawer + 1,
+    transition: theme.transitions.create(['width', 'margin'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.leavingScreen,
+    }),
+  },
+  appBarShift: {
+    marginLeft: drawerWidth,
+    width: `calc(100% - ${drawerWidth}px)`,
+    transition: theme.transitions.create(['width', 'margin'], {
+      easing: theme.transitions.easing.sharp,
+      duration: theme.transitions.duration.enteringScreen,
+    }),
+  },
+  menuButton: {
+    marginRight: theme.spacing(4),
+  },
+  menuButtonHidden: {
+    display: 'none',
+  },
   title: {
     flexGrow: 1,
     alignContent: "center",
@@ -19,35 +40,28 @@ const styles = makeStyles((theme) => ({
   },
 }));
 
-export default function Header() {
-  const classes = styles();
-  const [ , dispatch ] = useContext(MenuContext);
-
-  const openMenu = menuItem => {
-    dispatch({
-      type: "MENU_TOGGLE",
-      payload: menuItem
-    });
-  }
+export default function Header(props) {
+  const { onClick, showMenu, drawerWidth } = props;
+  const classes = styles(drawerWidth)();
 
   return (
-    <AppBar position='static'>
+    <AppBar position='absolute' className={clsx(classes.appBar, showMenu && classes.appBarShift)}>
       <Toolbar variant="dense">
-            <div className={classes.title}>
-              <Logo className={classes.logo} />
-            </div>
-            <SearchBar />
-            <div>
-              <IconButton color="inherit" onClick={()=> openMenu("tracker")}>
-                <AssessmentIcon />
-              </IconButton>
-              <IconButton color="inherit" onClick={()=> openMenu("history")}>
-                <HistoryIcon />
-              </IconButton>
-              <IconButton color="inherit" onClick={()=> openMenu("setting")}>
-                <SettingsIcon />
-              </IconButton>
-            </div>
+        <IconButton 
+          edge="start"
+          color="inherit" 
+          onClick={onClick}
+          className={clsx(classes.menuButton, showMenu && classes.menuButtonHidden)}>
+            <MenuIcon />
+        </IconButton>
+        <div className={classes.title}>
+          <Logo className={classes.logo} />
+        </div>
+        <IconButton color="inherit">
+          <Badge badgeContent={4} color="secondary">
+            <AssessmentIcon />
+          </Badge>
+        </IconButton>
       </Toolbar>
     </AppBar>
   )
