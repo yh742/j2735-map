@@ -40,7 +40,7 @@ const initialState = {
     mapView: {
         latitude: 0,
         longitude: 0,
-        zoom: 20,
+        zoom: 12,
         bearing: 0,
         pitch: 0
     },
@@ -61,34 +61,18 @@ const reducer = (state, action) => {
             };
         case SettingActions.addHistory:
             console.log(SettingActions.addHistory, state.history, action.payload);
-            let filtered = state.history.filter(item => item.id !== action.payload.id);
+            let filtered = state.history.filter(item => item.id !== action.payload.id).slice(0,10);
             return {
                 ...cloneDeep(state),
                 history: [action.payload, ...cloneDeep(filtered)]
             };
         case SettingActions.setMapView:
-            console.log(SettingActions.setMapView, state.mapView, action.payload);
-            const {
-                latitude,
-                longitude,
-                zoom,
-                bearing,
-                pitch,
-            } = action.payload;
             return {
                 ...cloneDeep(state),
                 mapView: {
-                    latitude: latitude,
-                    longitude: longitude,
-                    zoom: zoom,
-                    bearing: bearing,
-                    pitch: pitch,
+                    ...state.mapView,
+                    ...action.payload,
                 }
-            }
-        case SettingActions.setState:
-            console.log(SettingActions.setState, state, action.payload);
-            return {
-                ...cloneDeep(action.payload)
             }
         case SettingActions.restoreState:
             let settings = localStorage.getItem("lastSettingState");
@@ -96,8 +80,18 @@ const reducer = (state, action) => {
             try {
                 let settingObj = JSON.parse(settings);
                 if (ValidateSettings(settingObj)) {
+                    const {
+                        latitude, longitude, zoom, bearing, pitch
+                    } = settingObj.mapView
                     return {
-                        ...settingObj
+                        ...settingObj,
+                        mapView: {
+                            latitude: latitude,
+                            longitude: longitude,
+                            zoom: zoom,
+                            bearing: bearing,
+                            pitch: pitch
+                        }
                     }
                 } else {
                     console.log("ERROR: cannot set object")
@@ -109,6 +103,8 @@ const reducer = (state, action) => {
             return {
                 ...initialState
             }
+        default:
+            break;
     }
 }
 

@@ -1,5 +1,5 @@
 import React from 'react'
-import { SettingContext, SettingActions, ValidateSettings } from '../Store'
+import { SettingContext, SettingActions} from '../Store'
 
 import { Component } from "react";
 import { withStyles } from '@material-ui/core'
@@ -48,31 +48,11 @@ class Map extends Component {
       }
     })
   }
-
-  // componentDidMount() {
-  //   console.log(this.context);
-  //   window.addEventListener('onbeforeunload', this.onLoadingCallback);
-  // }
-
-  // componentWillUnmount() {
-  //   window.removeEventListener('onbeforeunload', this.onLoadingCallback);
-  // }
-
-  // onLoadingCallback = () => {
-  //   const [state,] = this.context;
-  //   console.log("saving state...", state);
-  //   localStorage.setItem("lastSettingState", JSON.stringify(state));
-  // }
-
-  // handleMapLoad = () => {
-  //   const [ , dispatch] = this.context;
-  //   dispatch({
-  //     type: SettingActions.restoreState,
-  //   });
-  // }
     
   handleGeocoderViewportChange = (viewport) => {
-    const geocoderDefaultOverrides = { transitionDuration: 1000 }
+    const geocoderDefaultOverrides = { 
+      transitionDuration: 500,
+    }
     return this.handleViewportChange({
       ...viewport,
       ...geocoderDefaultOverrides
@@ -104,7 +84,7 @@ class Map extends Component {
           <NavigationControl />
         </div>
         {/* <Layer {...parkLayer} paint={{'fill-color': '#dea'}} /> */}
-        <Layer {...RoadLabels} layout={{...RoadLabels.layout, "visibility": "none"}}/>
+        <Layer {...RoadLabels} layout={{...RoadLabels.layout, "visibility": state.stNames? "visible": "none"}}/>
       </ReactMapGL>
     );
   }

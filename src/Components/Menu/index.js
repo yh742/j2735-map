@@ -64,7 +64,7 @@ export default function DrawerMenu(props) {
   const maxStringLength = 17;
 
   const handleHistory = (event) => {
-    console.log(event.center);
+    console.log(event);
     dispatch({
       type: SettingActions.setMapView,
       payload: {
