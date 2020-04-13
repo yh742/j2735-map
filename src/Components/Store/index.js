@@ -10,6 +10,7 @@ export const SettingActions = {
     setMapView: "SET_MAP_VIEW",
     setState: "SET_STATE",
     restoreState: "RESTORE_STATE",
+    clearHistory: "CLEAR_HISTORY",
 }
 
 const schema = {
@@ -61,11 +62,17 @@ const reducer = (state, action) => {
             };
         case SettingActions.addHistory:
             console.log(SettingActions.addHistory, state.history, action.payload);
-            let filtered = state.history.filter(item => item.id !== action.payload.id).slice(0,10);
+            // limit history items to 10
+            let filtered = state.history.filter(item => item.id !== action.payload.id).slice(0,9);
             return {
                 ...cloneDeep(state),
                 history: [action.payload, ...cloneDeep(filtered)]
             };
+        case SettingActions.clearHistory:
+            return {
+                ...cloneDeep(state),
+                history: []
+            }
         case SettingActions.setMapView:
             return {
                 ...cloneDeep(state),

@@ -8,6 +8,7 @@ import MapIcon from '@material-ui/icons/Map';
 import HistoryIcon from '@material-ui/icons/History';
 import SettingIcon from '@material-ui/icons/Settings';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+import DeleteSweepIcon from '@material-ui/icons/DeleteSweep';
 
 import { 
   Drawer, 
@@ -51,9 +52,6 @@ const useStyles = drawerWidth => makeStyles((theme) =>({
     [theme.breakpoints.up('sm')]: {
       paddingLeft: theme.spacing(1),
     },
-  },
-  historyText: {
-    fontSize: 6
   }
 }));
 
@@ -61,7 +59,7 @@ export default function DrawerMenu(props) {
   const {showMenu, onClick, drawerWidth } = props;
   const classes = useStyles(drawerWidth)();
   const [state, dispatch] = useContext(SettingContext);
-  const maxStringLength = 17;
+  const maxStringLength = 21;
 
   const handleHistory = (event) => {
     console.log(event);
@@ -71,6 +69,12 @@ export default function DrawerMenu(props) {
         longitude: event.center[0], 
         latitude: event.center[1]
       },
+    });
+  }
+
+  const handleClearHistory = () => {
+    dispatch({
+      type: SettingActions.clearHistory
     });
   }
 
@@ -103,18 +107,24 @@ export default function DrawerMenu(props) {
         </List>
         <Divider />
         <List>
-        <ListSubheader inset>Past Searches</ListSubheader>
-        {
-          state.history.map((item) => (
-            <ListItem key={item.id} button component={Link} to="/" onClick={() => handleHistory(item)}>
-              <ListItemIcon className={classes.listIcon}>
-                <HistoryIcon />
-              </ListItemIcon>
-              <ListItemText className={classes.historyText}
-                secondary={item.text.length <= 20? item.text: item.text.substring(0, maxStringLength) + "..." } />
-            </ListItem>
-          )
-        )}
+        <ListSubheader inset>Search History</ListSubheader>
+          {
+            state.history.map((item) => (
+              <ListItem key={item.id} button component={Link} to="/" onClick={() => handleHistory(item)}>
+                <ListItemIcon className={classes.listIcon}>
+                  <HistoryIcon />
+                </ListItemIcon>
+                <ListItemText
+                  primary={item.text.length <= maxStringLength? item.text: item.text.substring(0, maxStringLength) + "..." } />
+              </ListItem>
+            )
+          )}
+          <ListItem button onClick={handleClearHistory}>
+            <ListItemIcon className={classes.listIcon}>
+              <DeleteSweepIcon />
+            </ListItemIcon>
+            <ListItemText primary="Clear History" />
+          </ListItem>
         </List>
       </Drawer>
   );

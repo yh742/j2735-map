@@ -61,7 +61,7 @@ class App extends Component {
   }
 
   static getDrawerWidth() {
-    return 240;
+    return 300;
   }
 
   handleMenuToggle = () => {
