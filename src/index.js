@@ -2,12 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import * as serviceWorker from './serviceWorker';
 
-import './index.css';
 import App from './App';
-import {NeueHaasGrotesk, NeueHaasGroteskBold} from './Font/Font'
+import {NeueHaasGrotesk, NeueHaasGroteskBold} from './font/Font'
 import CssBaseline from '@material-ui/core/CssBaseline'
-import {BrowserRouter} from 'react-router-dom'
+import { BrowserRouter, withRouter } from 'react-router-dom'
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles'
+
+import { SettingContextProvider } from "./Components/Store";
 
 const theme = createMuiTheme({
   typography: {
@@ -30,12 +31,16 @@ const theme = createMuiTheme({
   },
 });
 
+const RouteAwareApp = withRouter(App);
+
 ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>
       <MuiThemeProvider theme={theme}>
         <CssBaseline />
-        <App />
+        <SettingContextProvider>
+          <RouteAwareApp />
+        </SettingContextProvider>
       </MuiThemeProvider>
     </BrowserRouter>
   </React.StrictMode>,

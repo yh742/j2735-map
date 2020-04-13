@@ -8,7 +8,6 @@ import {
     ListItem, 
     ListItemText, 
     Switch, 
-    Divider,
     ListSubheader, 
     ListItemSecondaryAction } from '@material-ui/core';
 import { SettingContext, SettingActions } from '../Store';
@@ -17,7 +16,6 @@ const useStyles = makeStyles((theme)=> ({
     container: {
         paddingLeft: theme.spacing(4),
         paddingRight: theme.spacing(4),
-        paddingTop: theme.spacing(4),
         paddingBottom: theme.spacing(4),
         width: "100%",
     },

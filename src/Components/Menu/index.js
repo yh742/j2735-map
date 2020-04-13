@@ -1,12 +1,14 @@
-import React from 'react';
+import React, {useContext} from 'react';
 import clsx from 'clsx';
-
-import MapIcon from '@material-ui/icons/Map';
-import SettingIcon from '@material-ui/icons/Settings'
-
 import { Link } from 'react-router-dom';
 
+import {SettingContext, SettingActions} from '../Store';
+
+import MapIcon from '@material-ui/icons/Map';
+import HistoryIcon from '@material-ui/icons/History';
+import SettingIcon from '@material-ui/icons/Settings';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
+
 import { 
   Drawer, 
   IconButton, 
@@ -49,12 +51,29 @@ const useStyles = drawerWidth => makeStyles((theme) =>({
     [theme.breakpoints.up('sm')]: {
       paddingLeft: theme.spacing(1),
     },
+  },
+  historyText: {
+    fontSize: 6
   }
 }));
 
 export default function DrawerMenu(props) {
   const {showMenu, onClick, drawerWidth } = props;
   const classes = useStyles(drawerWidth)();
+  const [state, dispatch] = useContext(SettingContext);
+  const maxStringLength = 17;
+
+  const handleHistory = (event) => {
+    console.log(event.center);
+    dispatch({
+      type: SettingActions.setMapView,
+      payload: {
+        longitude: event.center[0], 
+        latitude: event.center[1]
+      },
+    });
+  }
+
   return (
       <Drawer open={showMenu}             
         classes={{
@@ -85,6 +104,17 @@ export default function DrawerMenu(props) {
         <Divider />
         <List>
         <ListSubheader inset>Past Searches</ListSubheader>
+        {
+          state.history.map((item) => (
+            <ListItem key={item.id} button component={Link} to="/" onClick={() => handleHistory(item)}>
+              <ListItemIcon className={classes.listIcon}>
+                <HistoryIcon />
+              </ListItemIcon>
+              <ListItemText className={classes.historyText}
+                secondary={item.text.length <= 20? item.text: item.text.substring(0, maxStringLength) + "..." } />
+            </ListItem>
+          )
+        )}
         </List>
       </Drawer>
   );
