@@ -4,7 +4,7 @@ import { SettingContext, SettingActions} from '../Store'
 import CreateMqttClient, { CloseMqtt } from './MqttClient/MqttClient'
 
 import { Component } from "react";
-import { withStyles, ThemeProvider } from '@material-ui/core'
+import { withStyles } from '@material-ui/core'
 
 import { ParseSpeed, ParseLocation, ParseHeading, Rotate, ScaleMarker } from './Conversions'
 import RoadLabels from './Assets/Layers/RoadLabels'
@@ -135,7 +135,7 @@ class Map extends Component {
   }
 
   handleInteractions = (iState) => {
-    if (iState.isDragging || iState.isPanning || iState.isRotating || iState.isZooming && 
+    if ((iState.isDragging || iState.isPanning || iState.isRotating || iState.isZooming) && 
         this.state.animateIcon === true) {
       this.setState({
         animateIcon: false,
@@ -168,8 +168,10 @@ class Map extends Component {
     let markers = state.mapView.zoom > 16 && this.mapRef.current?
         Object.keys(state.markers)
           .filter(key => this.mapRef.current.getMap().getBounds().contains([state.markers[key].long, state.markers[key].lat]))
-          .map(key => <Marker className={clsx(this.state.animateIcon && classes.markerContainer)} key={key} latitude={state.markers[key].lat} longitude={state.markers[key].long}>
+          .map(key => 
+          <Marker className={clsx(this.state.animateIcon && classes.markerContainer)} key={key} latitude={state.markers[key].lat} longitude={state.markers[key].long}>
             <img 
+              alt="message marker"
               src={state.markers[key].msgType === "BSM"? CarIcon: PedIcon} 
               style={{
                 transition: "transform 1000ms linear",
@@ -182,7 +184,6 @@ class Map extends Component {
     if (markers !== null && markers.length === 0) {
       markers = null;
     }
-    
     return (
       <ReactMapGL
         ref={this.mapRef}

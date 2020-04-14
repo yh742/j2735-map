@@ -12,6 +12,7 @@ export default function CreateMqttClient(callback) {
                 console.log("couldn't connect to mqtt server");
                 return;
             }
+            console.log("connected to mqtt server");
             client.on("message", callback);
         });
     });
