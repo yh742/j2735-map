@@ -5,7 +5,7 @@ import { AppBar, Toolbar, IconButton, Badge } from '@material-ui/core'
 import MenuIcon from '@material-ui/icons/Menu';
 import AssessmentIcon from '@material-ui/icons/Assessment';
 import { makeStyles } from '@material-ui/core/styles'
-import { ReactComponent as Logo } from "./logo.svg";
+import { ReactComponent as Logo } from "./Assets/logo.svg";
 
 
 const styles = drawerWidth => makeStyles((theme) => ({

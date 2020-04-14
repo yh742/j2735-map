@@ -11,6 +11,7 @@ export const SettingActions = {
     setState: "SET_STATE",
     restoreState: "RESTORE_STATE",
     clearHistory: "CLEAR_HISTORY",
+    addMarker: "ADD_MARKER",
 }
 
 const schema = {
@@ -25,6 +26,7 @@ const schema = {
     enableSPaT: value => typeof value === 'boolean',
     history: value => Array.isArray(value),
     mapView: value => typeof value === 'object',
+    markers: value => typeof value === 'object',
 };
 
 const initialState = {
@@ -45,6 +47,7 @@ const initialState = {
         bearing: 0,
         pitch: 0
     },
+    markers: {},
 };
 
 export const ValidateSettings = (obj) =>
@@ -57,7 +60,7 @@ const reducer = (state, action) => {
         case SettingActions.menuToggle:
             console.log(SettingActions.addHistory, state[action.payload], !state[action.payload])
             return {
-                ...cloneDeep(state),
+                ...state,
                 [action.payload]: !state[action.payload]
             };
         case SettingActions.addHistory:
@@ -65,19 +68,27 @@ const reducer = (state, action) => {
             // limit history items to 10
             let filtered = state.history.filter(item => item.id !== action.payload.id).slice(0,9);
             return {
-                ...cloneDeep(state),
+                ...state,
                 history: [action.payload, ...cloneDeep(filtered)]
             };
         case SettingActions.clearHistory:
             return {
-                ...cloneDeep(state),
+                ...state,
                 history: []
             }
         case SettingActions.setMapView:
             return {
-                ...cloneDeep(state),
+                ...state,
                 mapView: {
                     ...state.mapView,
+                    ...action.payload,
+                }
+            }
+        case SettingActions.addMarker:
+            return {
+                ...state,
+                markers: {
+                    ...state.markers,
                     ...action.payload,
                 }
             }
@@ -87,11 +98,13 @@ const reducer = (state, action) => {
             try {
                 let settingObj = JSON.parse(settings);
                 if (ValidateSettings(settingObj)) {
+                    // only restore these fields, otherwise mapbox crashes
                     const {
                         latitude, longitude, zoom, bearing, pitch
                     } = settingObj.mapView
                     return {
                         ...settingObj,
+                        markers: {},
                         mapView: {
                             latitude: latitude,
                             longitude: longitude,
@@ -108,10 +121,12 @@ const reducer = (state, action) => {
               console.log("ERROR: unable to parse json string from local storage");  
             }
             return {
-                ...initialState
+                ...state
             }
         default:
-            break;
+            return {
+                ...state
+            }
     }
 }
 

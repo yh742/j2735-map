@@ -108,7 +108,7 @@ export default function DrawerMenu(props) {
         <Divider />
         <List>
         <ListSubheader inset>Search History</ListSubheader>
-          {
+          { state?
             state.history.map((item) => (
               <ListItem key={item.id} button component={Link} to="/" onClick={() => handleHistory(item)}>
                 <ListItemIcon className={classes.listIcon}>
@@ -118,7 +118,7 @@ export default function DrawerMenu(props) {
                   primary={item.text.length <= maxStringLength? item.text: item.text.substring(0, maxStringLength) + "..." } />
               </ListItem>
             )
-          )}
+          ): null }
           <ListItem button onClick={handleClearHistory}>
             <ListItemIcon className={classes.listIcon}>
               <DeleteSweepIcon />
