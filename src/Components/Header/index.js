@@ -41,7 +41,7 @@ const styles = drawerWidth => makeStyles((theme) => ({
 }));
 
 export default function Header(props) {
-  const { onClick, showMenu, drawerWidth } = props;
+  const { onClick, showMenu, drawerWidth, onAssessmentClick } = props;
   const classes = styles(drawerWidth)();
 
   return (
@@ -57,7 +57,7 @@ export default function Header(props) {
         <div className={classes.title}>
           <Logo className={classes.logo} />
         </div>
-        <IconButton color="inherit">
+        <IconButton color="inherit" onClick={onAssessmentClick}>
           <Badge badgeContent={4} color="secondary">
             <AssessmentIcon />
           </Badge>

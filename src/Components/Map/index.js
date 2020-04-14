@@ -4,7 +4,7 @@ import { SettingContext, SettingActions} from '../Store'
 import CreateMqttClient, { CloseMqtt } from './MqttClient/MqttClient'
 
 import { Component } from "react";
-import { withStyles } from '@material-ui/core'
+import { withStyles, ThemeProvider } from '@material-ui/core'
 
 import { ParseSpeed, ParseLocation, ParseHeading, Rotate, ScaleMarker } from './Conversions'
 import RoadLabels from './Assets/Layers/RoadLabels'
@@ -33,6 +33,7 @@ class Map extends Component {
     super(props);
     this.mapRef = React.createRef();
     this.localMarkerCache = {};
+    this.resizeTimer = null;
     this.state = {
       animateIcon: true,
     }
@@ -112,6 +113,18 @@ class Map extends Component {
     }
   }
 
+  handleMapResize = () => {
+    if (this.resizeTimer) {
+      clearTimeout(this.resizeTimer);
+    }
+    if (this.state.animateIcon) {
+        this.setState({
+          animateIcon: false,
+        });
+    }
+    this.resizeTimer = setTimeout(()=> this.setState({animateIcon: true}), 1000)
+  }
+
   handleTimer = () => {
     const [ , dispatch] = this.context;
     dispatch({
@@ -122,8 +135,8 @@ class Map extends Component {
   }
 
   handleInteractions = (iState) => {
-    console.log(iState);
-    if (iState.isDragging || iState.isPanning || iState.isRotating || iState.isZooming) {
+    if (iState.isDragging || iState.isPanning || iState.isRotating || iState.isZooming && 
+        this.state.animateIcon === true) {
       this.setState({
         animateIcon: false,
       })
@@ -151,6 +164,7 @@ class Map extends Component {
   render() {
     const {classes} = this.props;
     const [ state, ] = this.context;
+
     let markers = state.mapView.zoom > 16 && this.mapRef.current?
         Object.keys(state.markers)
           .filter(key => this.mapRef.current.getMap().getBounds().contains([state.markers[key].long, state.markers[key].lat]))
@@ -158,7 +172,7 @@ class Map extends Component {
             <img 
               src={state.markers[key].msgType === "BSM"? CarIcon: PedIcon} 
               style={{
-                transition: "transform 1000ms",
+                transition: "transform 1000ms linear",
                 width: "auto",
                 height: `${ScaleMarker(state.markers[key].lat, state.mapView.zoom, state.markers[key].msgType)}px`,  
                 transform: `rotate(${Rotate(state.markers[key].heading, state.mapView.bearing)}deg)`}} />
@@ -168,10 +182,12 @@ class Map extends Component {
     if (markers !== null && markers.length === 0) {
       markers = null;
     }
+    
     return (
       <ReactMapGL
         ref={this.mapRef}
         {...state.mapView}
+        onResize={this.handleMapResize}
         onLoad={this.handleMapLoad}
         onInteractionStateChange={this.handleInteractions}
         onViewportChange={this.handleViewportChange}

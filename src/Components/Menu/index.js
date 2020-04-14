@@ -111,7 +111,7 @@ export default function DrawerMenu(props) {
           { state?
             state.history.map((item) => (
               <ListItem key={item.id} button component={Link} to="/" onClick={() => handleHistory(item)}>
-                <ListItemIcon className={classes.listIcon}>
+                <ListItemIcon className={classes.listIcon} >
                   <HistoryIcon />
                 </ListItemIcon>
                 <ListItemText

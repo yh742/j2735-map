@@ -6,12 +6,13 @@ import './css/mapbox/mapbox-gl-geocoder.css';
 
 import { SettingContext, SettingActions } from "./Components/Store";
 import Header from "./Components/Header";
-import DrawerMenu from "./Components/Menu"
-import { withStyles } from '@material-ui/core'
+import DrawerMenu from "./Components/Menu";
+import AssessmentDrawer from "./Components/Assessment";
+import { withStyles } from '@material-ui/core';
 import { Route, Switch, Redirect } from 'react-router-dom';
 
-import Settings from './Components/Setting'
-import Map from './Components/Map'
+import Settings from './Components/Setting';
+import Map from './Components/Map';
 
 const styles = (theme) => ({
   root: {
@@ -39,6 +40,7 @@ class App extends Component {
     super(props);
     this.state = {
       showMenu: false,
+      showAssessment: false,
     };
   }
 
@@ -61,12 +63,20 @@ class App extends Component {
   }
 
   static getDrawerWidth() {
-    return 300;
+    return 280;
   }
 
   handleMenuToggle = () => {
     this.setState(prevState => ({
+      ...prevState,
       showMenu: !prevState.showMenu,
+    }));
+  }
+
+  handleAssessmentToggle = () => {
+    this.setState(prevState => ({
+      ...prevState,
+      showAssessment: !prevState.showAssessment,
     }));
   }
 
@@ -76,7 +86,7 @@ class App extends Component {
     const showMap = this.props.location.pathname === "/";
     return (
       <div className={classes.root}>
-        <Header onClick={this.handleMenuToggle} showMenu={this.state.showMenu} drawerWidth={App.getDrawerWidth()} />
+        <Header onClick={this.handleMenuToggle} onAssessmentClick={this.handleAssessmentToggle} showMenu={this.state.showMenu} drawerWidth={App.getDrawerWidth()} />
         <DrawerMenu onClick={this.handleMenuToggle} showMenu={this.state.showMenu} drawerWidth={App.getDrawerWidth()} />
         <main className={classes.content}>
           <div className={classes.appBarSpacer} />
@@ -88,6 +98,7 @@ class App extends Component {
             <Redirect to="/" />
           </Switch>
         </main>
+        <AssessmentDrawer showMenu={this.state.showAssessment} />
       </div>
     )
   }
