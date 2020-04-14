@@ -44,6 +44,10 @@ class App extends Component {
     };
   }
 
+  static getDrawerWidth() {
+    return 280;
+  }
+
   componentDidMount() {
     const [,dispatch] = this.context;
     dispatch({
@@ -62,32 +66,36 @@ class App extends Component {
     localStorage.setItem("lastSettingState", JSON.stringify(state));
   }
 
-  static getDrawerWidth() {
-    return 280;
-  }
-
   handleMenuToggle = () => {
     this.setState(prevState => ({
-      ...prevState,
       showMenu: !prevState.showMenu,
     }));
   }
 
   handleAssessmentToggle = () => {
+    const [, dispatch] = this.context;
     this.setState(prevState => ({
-      ...prevState,
       showAssessment: !prevState.showAssessment,
-    }));
+    }), () => {
+      if (this.state.showAssessment) dispatch({
+        type: SettingActions.clearNotification
+      });
+    });
   }
 
   render() {
     const {classes} = this.props;
+    const [state,] = this.context;
     // don't waste map reloads, just hide it based on current pathname
     const showMap = this.props.location.pathname === "/";
     return (
       <div className={classes.root}>
-        <Header onClick={this.handleMenuToggle} onAssessmentClick={this.handleAssessmentToggle} showMenu={this.state.showMenu} drawerWidth={App.getDrawerWidth()} />
-        <DrawerMenu onClick={this.handleMenuToggle} showMenu={this.state.showMenu} drawerWidth={App.getDrawerWidth()} />
+        <Header onClick={this.handleMenuToggle} 
+          onAssessmentClick={this.handleAssessmentToggle} 
+          badgeCount={state.newMessages}
+          drawerWidth={App.getDrawerWidth()}
+          showMenu={this.state.showMenu} />
+        <DrawerMenu onClick={this.handleMenuToggle} showMenu={this.state.showMenu} drawerWidth={App.getDrawerWidth()}/>
         <main className={classes.content}>
           <div className={classes.appBarSpacer} />
           <div className={clsx(showMap && classes.mapContainer)}>

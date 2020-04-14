@@ -12,6 +12,7 @@ export const SettingActions = {
     restoreState: "RESTORE_STATE",
     clearHistory: "CLEAR_HISTORY",
     addMarker: "ADD_MARKER",
+    clearNotification: "CLEAR_NOTIFICATION",
 }
 
 const schema = {
@@ -47,6 +48,7 @@ const initialState = {
         bearing: 0,
         pitch: 0
     },
+    newMessages: 0,
     markers: {},
 };
 
@@ -65,8 +67,8 @@ const reducer = (state, action) => {
             };
         case SettingActions.addHistory:
             console.log(SettingActions.addHistory, state.history, action.payload);
-            // limit history items to 10
-            let filtered = state.history.filter(item => item.id !== action.payload.id).slice(0,9);
+            // (1) move duplicate searches to top (2) limit history items to 8
+            let filtered = state.history.filter(item => item.id !== action.payload.id).slice(0,7);
             return {
                 ...state,
                 history: [action.payload, ...cloneDeep(filtered)]
@@ -75,6 +77,11 @@ const reducer = (state, action) => {
             return {
                 ...state,
                 history: []
+            }
+        case SettingActions.clearNotification:
+            return {
+                ...state,
+                newMessages: 0,
             }
         case SettingActions.setMapView:
             return {
@@ -85,8 +92,10 @@ const reducer = (state, action) => {
                 }
             }
         case SettingActions.addMarker:
+            let count = Object.keys(action.payload).filter(key=> !(key in state.markers)).length;
             return {
                 ...state,
+                newMessages: state.newMessages + count,
                 markers: {
                     ...state.markers,
                     ...action.payload,

@@ -38,6 +38,8 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
+const maxStringLength = 20;
+
 export default function AssessmentDrawer(props) {
   const classes = useStyles();
   const {showMenu} = props;
@@ -63,7 +65,12 @@ export default function AssessmentDrawer(props) {
                     {state.markers[key].msgType === "BSM"? <LocalTaxiIcon />: <AccessibilityIcon />}
                   </ListItemIcon>
                 <ListItemText
-                  primary={key} secondary={state.markers[key].topic} />
+                  primary={key} 
+                  secondary={
+                    state.markers[key].topic.length <= maxStringLength? 
+                    state.markers[key].topic: 
+                    state.markers[key].topic.substring(0, maxStringLength) + "..." 
+                    } />
               </ListItem>)): 
               <ListItem key="empty">
                   <ListItemIcon>

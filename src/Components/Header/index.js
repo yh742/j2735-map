@@ -3,10 +3,9 @@ import clsx from 'clsx';
 
 import { AppBar, Toolbar, IconButton, Badge } from '@material-ui/core'
 import MenuIcon from '@material-ui/icons/Menu';
-import AssessmentIcon from '@material-ui/icons/Pageview';
+import InfoIcon from '@material-ui/icons/Info';
 import { makeStyles } from '@material-ui/core/styles'
 import { ReactComponent as Logo } from "./Assets/logo.svg";
-
 
 const styles = drawerWidth => makeStyles((theme) => ({
   appBar: {
@@ -41,7 +40,7 @@ const styles = drawerWidth => makeStyles((theme) => ({
 }));
 
 export default function Header(props) {
-  const { onClick, showMenu, drawerWidth, onAssessmentClick } = props;
+  const { onClick, showMenu, drawerWidth, onAssessmentClick, badgeCount } = props;
   const classes = styles(drawerWidth)();
 
   return (
@@ -58,8 +57,8 @@ export default function Header(props) {
           <Logo className={classes.logo} />
         </div>
         <IconButton color="inherit" onClick={onAssessmentClick}>
-          <Badge badgeContent={4} color="secondary">
-            <AssessmentIcon />
+          <Badge badgeContent={badgeCount} color="secondary">
+            <InfoIcon />
           </Badge>
         </IconButton>
       </Toolbar>
