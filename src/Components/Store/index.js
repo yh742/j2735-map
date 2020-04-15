@@ -114,6 +114,7 @@ const reducer = (state, action) => {
                     return {
                         ...settingObj,
                         markers: {},
+                        newMessages: 0,
                         mapView: {
                             latitude: latitude,
                             longitude: longitude,

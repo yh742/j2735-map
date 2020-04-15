@@ -1,27 +1,22 @@
 import React from 'react'
-import clsx from 'clsx'
 import { SettingContext, SettingActions} from '../Store'
-import CreateMqttClient, { CloseMqtt } from './MqttClient/MqttClient'
+import Markers from './Markers/Markers'
+import MqttClient from './MqttClient/MqttClient'
 
 import { Component } from "react";
 import { withStyles } from '@material-ui/core'
 
-import { ParseSpeed, ParseLocation, ParseHeading, Rotate, ScaleMarker } from './Conversions'
 import RoadLabels from './Assets/Layers/RoadLabels'
-import CarIcon from './Assets/Images/car.png'
-import PedIcon from './Assets/Images/ped.png'
+
 
 import Geocoder from 'react-map-gl-geocoder'
-import ReactMapGL, {Layer, NavigationControl, ScaleControl, Marker} from "react-map-gl"
+import ReactMapGL, {Layer, NavigationControl, ScaleControl} from "react-map-gl"
 
 const styles = (theme) => ({
   navControl: {
     position: 'absolute', 
     right: theme.spacing(1),
     bottom: theme.spacing(8)
-  },
-  markerContainer: {
-    transition: "all 1000ms linear",
   }
 })
 
@@ -70,49 +65,7 @@ class Map extends Component {
     })
   }
 
-  handleMqttMessages = (topic, message) => {
-    let jsonString = new TextDecoder('utf-8').decode(message)
-    let jsonObj;
-    try {
-      jsonObj = JSON.parse(jsonString);
-    } catch (e) {
-      console.log("couldn't convert " + jsonString + " to json object");
-      return;
-    }
-    if ("BasicSafetyMessage" in jsonObj.MessageFrame.value) {
-      // handle BSM messages here
-      this.convertMessages(
-        jsonObj.MessageFrame.value.BasicSafetyMessage.coreData,
-        topic,
-        "BSM"
-        );
-    } else if ("PersonalSafetyMessage" in jsonObj.MessageFrame.value){
-      this.convertMessages(
-        jsonObj.MessageFrame.value.PersonalSafetyMessage,
-        topic, 
-        "PSM"
-      );
-    }
-  }
-
-  // TODO: parse partII of the BSM messages
-  convertMessages = (msgObj, topic, msgType) => {
-    const {
-      heading, id, long, lat, speed
-    } = msgObj;
-    this.localMarkerCache = {
-      ...this.localMarkerCache,
-      [id]: {
-        topic: topic,
-        msgType: msgType,
-        long: ParseLocation(long),
-        lat: ParseLocation(lat),
-        speed: ParseSpeed(speed),
-        heading: ParseHeading(heading),
-      }
-    }
-  }
-
+  // when map resizes disable transition animation
   handleMapResize = () => {
     if (this.resizeTimer) {
       clearTimeout(this.resizeTimer);
@@ -125,15 +78,8 @@ class Map extends Component {
     this.resizeTimer = setTimeout(()=> this.setState({animateIcon: true}), 1000)
   }
 
-  handleTimer = () => {
-    const [ , dispatch] = this.context;
-    dispatch({
-      type: SettingActions.addMarker,
-      payload: this.localMarkerCache
-    });
-    this.localMarkerCache = {};
-  }
 
+  // remove animation transition when user is interacting
   handleInteractions = (iState) => {
     if ((iState.isDragging || iState.isPanning || iState.isRotating || iState.isZooming) && 
         this.state.animateIcon === true) {
@@ -148,16 +94,18 @@ class Map extends Component {
   }
 
   componentDidMount() {
-    this.mqttClient = CreateMqttClient(this.handleMqttMessages);
-    this.interval = setInterval(this.handleTimer, 1000);
+    this.mqttClient = new MqttClient((cache) => {
+      const [, dispatch] = this.context;
+      dispatch({
+        type: SettingActions.addMarker,
+        payload: cache
+      });
+    });
   }
 
   componentWillUnmount() {
     if (this.mqttClient) {
-      CloseMqtt(this.mqttClient);
-    }
-    if (this.interval) {
-      clearInterval(this.interval);
+      this.mqttClient.close();
     }
   }
 
@@ -165,25 +113,6 @@ class Map extends Component {
     const {classes} = this.props;
     const [ state, ] = this.context;
 
-    let markers = state.mapView.zoom > 16 && this.mapRef.current?
-        Object.keys(state.markers)
-          .filter(key => this.mapRef.current.getMap().getBounds().contains([state.markers[key].long, state.markers[key].lat]))
-          .map(key => 
-          <Marker className={clsx(this.state.animateIcon && classes.markerContainer)} key={key} latitude={state.markers[key].lat} longitude={state.markers[key].long}>
-            <img 
-              alt="message marker"
-              src={state.markers[key].msgType === "BSM"? CarIcon: PedIcon} 
-              style={{
-                transition: "transform 1000ms linear",
-                width: "auto",
-                height: `${ScaleMarker(state.markers[key].lat, state.mapView.zoom, state.markers[key].msgType)}px`,  
-                transform: `rotate(${Rotate(state.markers[key].heading, state.mapView.bearing)}deg)`}} />
-          </Marker>)
-          : null;
-
-    if (markers !== null && markers.length === 0) {
-      markers = null;
-    }
     return (
       <ReactMapGL
         ref={this.mapRef}
@@ -210,7 +139,10 @@ class Map extends Component {
           <ScaleControl maxWidth={100} unit="metric" />
         </div>
         <Layer {...RoadLabels} layout={{...RoadLabels.layout, "visibility": state.stNames? "visible": "none"}}/>
-        { markers }
+        { state.mapView.zoom > 16 && this.mapRef.current? 
+          <Markers 
+            animateIcon={this.state.animateIcon} 
+            inViewPort={(long, lat) => this.mapRef.current.getMap().getBounds().contains([long, lat])} />: null }
       </ReactMapGL>
     );
   }
