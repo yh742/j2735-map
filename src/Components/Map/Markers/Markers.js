@@ -20,9 +20,8 @@ export default function Markers(props) {
             let long = Math.floor(obj.long * 1e5) / 1e5;
             let speed = Math.floor(obj.speed);
             return (
-                <>
+                <div key={key}>
                 <Marker
-                    key={key}
                     animateIcon={state.animateIcons} 
                     lat={lat} 
                     long={long}
@@ -35,7 +34,7 @@ export default function Markers(props) {
                     speed={speed}
                     lat={lat} 
                     long={long} />}
-                </>
+                </div>
             )}): null }
         </>
     );

@@ -16,7 +16,7 @@ const useStyles = makeStyles(() => ({
 
 export default React.memo(({ animateIcon, lat, long, msgType, heading, zoom, mapBearing }) => {
     const classes = useStyles();
-    console.log(animateIcon, lat, long, msgType, heading, zoom, mapBearing );
+    // console.log(animateIcon, lat, long, msgType, heading, zoom, mapBearing );
     return (
         <Marker 
         className={clsx(animateIcon && classes.transition)} 

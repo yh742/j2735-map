@@ -13,6 +13,7 @@ export const SettingActions = {
     addMarker: "ADD_MARKER",
     clearNotification: "CLEAR_NOTIFICATION",
     setAnimation: "SET_ANIMATION",
+    setMapMode: "SET_MAP_MODE",
 }
 
 const schema = {
@@ -51,6 +52,10 @@ const initialState = {
     markers: {},
     newMessages: 0,
     animateIcons: true,
+    mapMode: {
+        worldView: true,
+        targetId: null,
+    }
 };
 
 export const ValidateSettings = (obj) =>
@@ -116,6 +121,10 @@ const reducer = (state, action) => {
                         ...settingObj,
                         markers: {},
                         newMessages: 0,
+                        mapMode: {
+                            worldView: true,
+                            targetId: null,
+                        },
                         mapView: {
                             latitude: latitude,
                             longitude: longitude,
@@ -136,6 +145,13 @@ const reducer = (state, action) => {
             return {
                 ...state,
                 animateIcons: action.payload,
+            }
+        case SettingActions.setMapMode:
+            return {
+                ...state,
+                mapMode: {
+                    ...action.payload,
+                }
             }
         default:
             return state

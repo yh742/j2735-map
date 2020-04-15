@@ -8,6 +8,7 @@ import AnimationStopper from '../Helper/Animation';
 
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
+import VideocamIcon from '@material-ui/icons/Videocam';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import LocalTaxiIcon from '@material-ui/icons/LocalTaxi';
@@ -36,6 +37,13 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.up('sm')]: {
       paddingLeft: theme.spacing(1),
     },
+  },
+  trackIconContainer: {
+    minWidth: "40px"
+  },
+  trackIcon: {
+    width: "20px",
+    height: "auto",
   }
 }));
 
@@ -46,15 +54,25 @@ export default function AssessmentDrawer(props) {
   const {showMenu} = props;
   const [state, dispatch] = useContext(SettingContext);
 
-  const handleClick = (item) => {
-    AnimationStopper(state, dispatch, 200);
-    dispatch({
-      type: SettingActions.setMapView,
-      payload: {
-        longitude: item.long,
-        latitude: item.lat,
-      }
-    });
+  const handleClick = (id) => {
+    AnimationStopper(state, dispatch);
+    if (id !== state.mapMode.targetId) {
+      dispatch({
+        type: SettingActions.setMapMode,
+        payload: {
+            worldView: false,
+            targetId: id,
+        }
+      });
+    } else {
+      dispatch({
+        type: SettingActions.setMapMode,
+        payload: {
+            worldView: true,
+            targetId: null,
+        }
+      });
+    }
   }
 
   return (
@@ -72,7 +90,7 @@ export default function AssessmentDrawer(props) {
             {
               Object.keys(state.markers).length > 0? 
               Object.keys(state.markers).map(key => (
-                <ListItem button key={key} onClick={() => handleClick(state.markers[key])}>
+                <ListItem button key={key} onClick={() => handleClick(key)}>
                   <ListItemIcon className={classes.listIcon}>
                     {state.markers[key].msgType === "BSM"? <LocalTaxiIcon />: <AccessibilityIcon />}
                   </ListItemIcon>
@@ -83,6 +101,8 @@ export default function AssessmentDrawer(props) {
                     state.markers[key].topic: 
                     state.markers[key].topic.substring(0, maxStringLength) + "..." 
                     } />
+                { key === state.mapMode.targetId ? 
+                  <ListItemIcon classes={{root:classes.trackIconContainer}}><VideocamIcon className={classes.trackIcon} /></ListItemIcon> : null }
               </ListItem>)): 
               <ListItem key="empty">
                   <ListItemIcon>

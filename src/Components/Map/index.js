@@ -111,6 +111,11 @@ class Map extends Component {
       <ReactMapGL
         ref={this.mapRef}
         {...state.mapView}
+        scrollZoom={state.mapMode.worldView}
+        dragPan={state.mapMode.worldView}
+        dragRotate={state.mapMode.worldView}
+        doubleClickZoom={state.mapMode.worldView}
+        touchZoom={state.mapMode.worldView}
         onResize={this.handleMapResize}
         onLoad={this.handleMapLoad}
         onInteractionStateChange={this.handleInteractions}
