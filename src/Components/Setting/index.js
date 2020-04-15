@@ -25,7 +25,7 @@ const useStyles = makeStyles((theme)=> ({
     }
   }));
 
-export default function Settings(props) {
+export default function Settings() {
     const classes = useStyles();
     const [state, dispatch] = useContext(SettingContext);
 
@@ -57,40 +57,36 @@ export default function Settings(props) {
             <Grid item xs={12}>
                 <Paper className={classes.paper}>
                     <List subheader={<ListSubheader>Display Settings</ListSubheader>} className={classes.root}>
-                        {
-                            Object.keys(displaySettings).map(item => (
-                                <ListItem key={item}>
-                                    <ListItemText primary={displaySettings[item]} />
-                                    <ListItemSecondaryAction>
-                                    <Switch
-                                        name={item}
-                                        checked={state[item]}
-                                        edge="end"
-                                        onChange={handleToggle}
-                                    />
-                                    </ListItemSecondaryAction>
-                                </ListItem>
-                            ))
-                        }
+                        { Object.keys(displaySettings).map(item => (
+                            <ListItem key={item}>
+                                <ListItemText primary={displaySettings[item]} />
+                                <ListItemSecondaryAction>
+                                <Switch
+                                    name={item}
+                                    checked={state[item]}
+                                    edge="end"
+                                    onChange={handleToggle}
+                                />
+                                </ListItemSecondaryAction>
+                            </ListItem>
+                        )) }
                     </List>
                 </Paper>
                 <Paper className={classes.paper}>
                     <List subheader={<ListSubheader>Message Settings</ListSubheader>} className={classes.root}>
-                        {
-                            Object.keys(messageSettings).map(item => (
-                                <ListItem key={item}>
-                                    <ListItemText primary={messageSettings[item]} />
-                                    <ListItemSecondaryAction>
-                                    <Switch
-                                        name={item}
-                                        checked={state[item]}
-                                        edge="end"
-                                        onChange={handleToggle}
-                                    />
-                                    </ListItemSecondaryAction>
-                                </ListItem>
-                            ))
-                        }
+                        { Object.keys(messageSettings).map(item => (
+                            <ListItem key={item}>
+                                <ListItemText primary={messageSettings[item]} />
+                                <ListItemSecondaryAction>
+                                <Switch
+                                    name={item}
+                                    checked={state[item]}
+                                    edge="end"
+                                    onChange={handleToggle}
+                                />
+                                </ListItemSecondaryAction>
+                            </ListItem>
+                            ))}
                     </List>
                 </Paper>
             </Grid>

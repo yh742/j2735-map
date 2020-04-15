@@ -10,7 +10,7 @@ import RoadLabels from './Assets/Layers/RoadLabels'
 
 
 import Geocoder from 'react-map-gl-geocoder'
-import ReactMapGL, {Layer, NavigationControl, ScaleControl} from "react-map-gl"
+import ReactMapGL, { Layer, NavigationControl } from "react-map-gl"
 
 const styles = (theme) => ({
   navControl: {
@@ -20,7 +20,7 @@ const styles = (theme) => ({
   }
 })
 
-const MAPBOX_TOKEN = "pk.eyJ1IjoieWg3NDIiLCJhIjoiY2s2ZnphcmxiMDEwaDNsbzVzMmFienR4ZyJ9.ID31klWjgTDI2oBKc-fXUA";
+const MAPBOX_TOKEN = window.production.mbToken;
 
 class Map extends Component {
 
@@ -78,7 +78,6 @@ class Map extends Component {
     this.resizeTimer = setTimeout(()=> this.setState({animateIcon: true}), 1000)
   }
 
-
   // remove animation transition when user is interacting
   handleInteractions = (iState) => {
     if ((iState.isDragging || iState.isPanning || iState.isRotating || iState.isZooming) && 
@@ -130,16 +129,12 @@ class Map extends Component {
           onResult={this.handleGeocoderOnResult}
           onViewportChange={this.handleGeocoderViewportChange}
           placeholder="Search Location..."
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-          />
+          mapboxApiAccessToken={MAPBOX_TOKEN} />
         <div className={classes.navControl}>
           <NavigationControl />
         </div>
-        <div style={{position: 'absolute', bottom: 100, left: 20}}>
-          <ScaleControl maxWidth={100} unit="metric" />
-        </div>
         <Layer {...RoadLabels} layout={{...RoadLabels.layout, "visibility": state.stNames? "visible": "none"}}/>
-        { state.mapView.zoom > 16 && this.mapRef.current? 
+          { state.mapView.zoom > 16 && this.mapRef.current? 
           <Markers 
             animateIcon={this.state.animateIcon} 
             inViewPort={(long, lat) => this.mapRef.current.getMap().getBounds().contains([long, lat])} />: null }
