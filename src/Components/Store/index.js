@@ -1,5 +1,4 @@
 import React, { useReducer, createContext } from 'react';
-
 import * as cloneDeep from 'lodash/cloneDeep';
 
 export const SettingContext = createContext();
@@ -13,6 +12,7 @@ export const SettingActions = {
     clearHistory: "CLEAR_HISTORY",
     addMarker: "ADD_MARKER",
     clearNotification: "CLEAR_NOTIFICATION",
+    setAnimation: "SET_ANIMATION",
 }
 
 const schema = {
@@ -48,8 +48,9 @@ const initialState = {
         bearing: 0,
         pitch: 0
     },
-    newMessages: 0,
     markers: {},
+    newMessages: 0,
+    animateIcons: true,
 };
 
 export const ValidateSettings = (obj) =>
@@ -130,13 +131,14 @@ const reducer = (state, action) => {
               // swallow this error, just use default location
               console.log("ERROR: unable to parse json string from local storage");  
             }
+            return state
+        case SettingActions.setAnimation:
             return {
-                ...state
+                ...state,
+                animateIcons: action.payload,
             }
         default:
-            return {
-                ...state
-            }
+            return state
     }
 }
 

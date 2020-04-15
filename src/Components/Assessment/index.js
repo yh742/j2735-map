@@ -2,8 +2,9 @@ import React, {useContext} from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import {ListSubheader }  from '@material-ui/core'
-import { SettingContext } from '../Store'
+import { SettingContext, SettingActions } from '../Store'
 import Drawer from '@material-ui/core/Drawer';
+import AnimationStopper from '../Helper/Animation';
 
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -43,8 +44,19 @@ const maxStringLength = 20;
 export default function AssessmentDrawer(props) {
   const classes = useStyles();
   const {showMenu} = props;
+  const [state, dispatch] = useContext(SettingContext);
 
-  const [state,] = useContext(SettingContext);
+  const handleClick = (item) => {
+    AnimationStopper(state, dispatch, 200);
+    dispatch({
+      type: SettingActions.setMapView,
+      payload: {
+        longitude: item.long,
+        latitude: item.lat,
+      }
+    });
+  }
+
   return (
     <>
       { showMenu === true ? (
@@ -60,7 +72,7 @@ export default function AssessmentDrawer(props) {
             {
               Object.keys(state.markers).length > 0? 
               Object.keys(state.markers).map(key => (
-                <ListItem button key={key}>
+                <ListItem button key={key} onClick={() => handleClick(state.markers[key])}>
                   <ListItemIcon className={classes.listIcon}>
                     {state.markers[key].msgType === "BSM"? <LocalTaxiIcon />: <AccessibilityIcon />}
                   </ListItemIcon>

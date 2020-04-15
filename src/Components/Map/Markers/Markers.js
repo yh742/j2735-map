@@ -5,7 +5,7 @@ import Popup from './Popup/Popup'
 
 export default function Markers(props) {
     const [state] = useContext(SettingContext);
-    const { inViewPort, animateIcon } = props;
+    const { inViewPort } = props;
 
     // only render markers that are in viewport 
     const inViewMarkers = Object.keys(state.markers)
@@ -23,7 +23,7 @@ export default function Markers(props) {
                 <>
                 <Marker
                     key={key}
-                    animateIcon={animateIcon} 
+                    animateIcon={state.animateIcons} 
                     lat={lat} 
                     long={long}
                     msgType={obj.msgType} 
@@ -31,7 +31,7 @@ export default function Markers(props) {
                     zoom={state.mapView.zoom}
                     mapBearing={state.mapView.bearing} />
                 { state.vehPopup && <Popup 
-                    animateIcon={animateIcon} 
+                    animateIcon={state.animateIcons} 
                     speed={speed}
                     lat={lat} 
                     long={long} />}

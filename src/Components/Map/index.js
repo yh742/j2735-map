@@ -12,6 +12,8 @@ import RoadLabels from './Assets/Layers/RoadLabels'
 import Geocoder from 'react-map-gl-geocoder'
 import ReactMapGL, { Layer, NavigationControl } from "react-map-gl"
 
+import AnimationStopper from '../Helper/Animation'
+
 const styles = (theme) => ({
   navControl: {
     position: 'absolute', 
@@ -29,9 +31,6 @@ class Map extends Component {
     this.mapRef = React.createRef();
     this.localMarkerCache = {};
     this.resizeTimer = null;
-    this.state = {
-      animateIcon: true,
-    }
   }
 
   handleViewportChange = (viewport) => {
@@ -67,28 +66,24 @@ class Map extends Component {
 
   // when map resizes disable transition animation
   handleMapResize = () => {
-    if (this.resizeTimer) {
-      clearTimeout(this.resizeTimer);
-    }
-    if (this.state.animateIcon) {
-        this.setState({
-          animateIcon: false,
-        });
-    }
-    this.resizeTimer = setTimeout(()=> this.setState({animateIcon: true}), 1000)
+    const [ state, dispatch ] = this.context;
+    AnimationStopper(state, dispatch, 500);
   }
 
   // remove animation transition when user is interacting
   handleInteractions = (iState) => {
+    const [ state, dispatch ] = this.context;
     if ((iState.isDragging || iState.isPanning || iState.isRotating || iState.isZooming) && 
-        this.state.animateIcon === true) {
-      this.setState({
-        animateIcon: false,
-      })
+        state.animateIcon === true) {
+      dispatch({
+        type: SettingActions.setAnimation,
+        payload: false,
+      });
     } else {
-      this.setState({
-        animateIcon: true,
-      })
+      dispatch({
+        type: SettingActions.setAnimation,
+        payload: true,
+      });
     }
   }
 
@@ -136,7 +131,6 @@ class Map extends Component {
         <Layer {...RoadLabels} layout={{...RoadLabels.layout, "visibility": state.stNames? "visible": "none"}}/>
           { state.mapView.zoom > 16 && this.mapRef.current? 
           <Markers 
-            animateIcon={this.state.animateIcon} 
             inViewPort={(long, lat) => this.mapRef.current.getMap().getBounds().contains([long, lat])} />: null }
       </ReactMapGL>
     );
