@@ -14,24 +14,39 @@ const useStyles = makeStyles(() => ({
     }
 }));
 
-export default React.memo(({ animateIcon, lat, long, msgType, heading, zoom, mapBearing }) => {
+export default React.memo(({ popup, animateIcon, lat, long, msgType, heading, speed, zoom, mapBearing }) => {
     const classes = useStyles();
-    // console.log(animateIcon, lat, long, msgType, heading, zoom, mapBearing );
+    //console.log(animateIcon, lat, long, msgType, heading, zoom, mapBearing );
     return (
         <Marker 
-        className={clsx(animateIcon && classes.transition)} 
+        className={clsx((animateIcon && speed > 1) && classes.transition)} 
         latitude={lat} 
         longitude={long}>
+            {popup? ( <>
+            <div style={{
+                position: "absolute",
+                display: "inline-block",
+                textAlign: "center",
+                whiteSpace: "nowrap",
+                top: `-22px`,
+                height: "20px",
+                maxWidth: "60px",
+                minWidth: "40px",
+                borderRadius: "2px",
+                fontSize: "10px",
+                padding: "4px",
+                backgroundColor: "white",
+                 }}>{speed} KPH</div>
             <img 
             alt="message marker"
             src={msgType === "BSM"? CarIcon: PedIcon}
-            className={clsx(animateIcon && classes.transition)} 
+            // className={clsx(animateIcon && classes.transition)} 
             style={{
                 width: "auto",
                 height: `${ScaleMarker(lat, zoom, msgType)}px`,
                 transform: `rotate(${Rotate(heading, mapBearing)}deg)`
             }}
-            />
+            /></>) : null}
         </Marker>
     );
 });

@@ -93,11 +93,16 @@ class App extends Component {
     return (
       <div className={classes.root}>
         <Header onClick={this.handleMenuToggle} 
+          showMenuButton={state.mapMode.worldView}
           onAssessmentClick={this.handleAssessmentToggle} 
           badgeCount={state.newMessages}
           drawerWidth={App.getDrawerWidth()}
-          showMenu={this.state.showMenu} />
-        <DrawerMenu onClick={this.handleMenuToggle} showMenu={this.state.showMenu} drawerWidth={App.getDrawerWidth()}/>
+          showMenu={this.state.showMenu} /> 
+        { 
+          state.mapMode.worldView? 
+            (<DrawerMenu onClick={this.handleMenuToggle} showMenu={this.state.showMenu} drawerWidth={App.getDrawerWidth()}/>)
+            : null
+        }
         <main className={classes.content}>
           <div className={classes.appBarSpacer} />
           <div className={clsx(showMap && classes.mapContainer)}>

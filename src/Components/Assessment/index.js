@@ -73,9 +73,19 @@ export default function AssessmentDrawer(props) {
     });
   }
 
-  const handleButtonClick = (event, id) => {
+  const handleButtonClick = (event, id, item) => {
     event.stopPropagation();
     setSelected(id);
+    AnimationStopper(state, dispatch, 1500);
+    dispatch({
+      type: SettingActions.setMapView,
+      payload: {
+        longitude: item.long,
+        latitude: item.lat,
+        bearing: item.heading,
+        transitionDuration: 0,
+      }
+    });
     dispatch({
       type: SettingActions.setMapMode,
       payload: {
@@ -112,7 +122,7 @@ export default function AssessmentDrawer(props) {
                     state.markers[key].topic: 
                     state.markers[key].topic.substring(0, maxStringLength) + "..." } />
                 <Button 
-                  onClick={(evt)=>handleButtonClick(evt, key)} 
+                  onClick={(evt)=>handleButtonClick(evt, key, state.markers[key])} 
                   variant={key === selected? "contained": "outlined"} 
                   size="small" 
                   color="primary" 

@@ -1,16 +1,16 @@
 import React from 'react';
 import clsx from 'clsx';
 import { Popup } from "react-map-gl"
-import { makeStyles } from '@material-ui/core'
+import { makeStyles} from '@material-ui/core'
 
 const useStyles = makeStyles(() => ({
     popup: {
         fontSize: '10px',
         padding: '0px',
     },
-    transition: {
-        transition: "all 1000ms linear",
-    }
+    // transition: {
+    //     transition: "transform 1000ms linear",
+    // }
 }));
 
 export default React.memo(({ animateIcon, lat, long, speed }) => {
@@ -20,6 +20,7 @@ export default React.memo(({ animateIcon, lat, long, speed }) => {
         className={clsx(classes.popup, animateIcon && classes.transition)} 
         latitude={lat} 
         tipSize={7}
+        dynamicPosition={false}
         anchor="bottom"
         closeButton={false}
         longitude={long}>

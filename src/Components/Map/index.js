@@ -1,8 +1,6 @@
 import React from 'react'
 import { SettingContext, SettingActions} from '../Store'
 import Markers from './Markers/Markers'
-import MqttClient from './MqttClient/MqttClient'
-
 import { Component } from "react";
 import { withStyles } from '@material-ui/core'
 
@@ -10,7 +8,7 @@ import RoadLabels from './Assets/Layers/RoadLabels'
 
 
 import Geocoder from 'react-map-gl-geocoder'
-import ReactMapGL, { Layer, NavigationControl } from "react-map-gl"
+import ReactMapGL, { Layer, NavigationControl, LinearInterpolator, FlyToInterpolator } from "react-map-gl"
 
 import AnimationStopper from '../Helper/Animation'
 
@@ -74,6 +72,7 @@ class Map extends Component {
   // remove animation transition when user is interacting
   handleInteractions = (iState) => {
     const [ state, dispatch ] = this.context;
+    if (!state.mapMode.worldView) return;
     if ((iState.isDragging || iState.isPanning || iState.isRotating || iState.isZooming) && 
         state.animateIcon === true) {
       dispatch({
@@ -88,26 +87,9 @@ class Map extends Component {
     }
   }
 
-  componentDidMount() {
-    this.mqttClient = new MqttClient((cache) => {
-      console.log("dispatching markers");
-      const [,dispatch] = this.context;
-      dispatch({
-        type: SettingActions.updateMarker,
-        payload: cache
-      });
-    });
-  }
-
-  componentWillUnmount() {
-    if (this.mqttClient) {
-      this.mqttClient.close();
-    }
-  }
-
   render() {
     const {classes} = this.props;
-    const [ state, ] = this.context;
+    const [ state ] = this.context;
 
     return (
       <ReactMapGL
@@ -120,12 +102,14 @@ class Map extends Component {
         touchZoom={state.mapMode.worldView}
         onResize={this.handleMapResize}
         onLoad={this.handleMapLoad}
+        transitionInterpolator={new LinearInterpolator({transitionProps:['longitude', 'latitude', 'zoom', 'pitch', 'bearing']})}
         onInteractionStateChange={this.handleInteractions}
         onViewportChange={this.handleViewportChange}
         mapboxApiAccessToken={MAPBOX_TOKEN}
         mapStyle={MAPBOX_STYLE}
         height="100%"
         width="100%">
+        { state.mapMode.worldView? ( <>
         <Geocoder 
           mapRef={this.mapRef}
           onResult={this.handleGeocoderOnResult}
@@ -134,9 +118,9 @@ class Map extends Component {
           mapboxApiAccessToken={MAPBOX_TOKEN} />
         <div className={classes.navControl}>
           <NavigationControl />
-        </div>
+        </div></>) : null }
         <Layer {...RoadLabels} layout={{...RoadLabels.layout, "visibility": state.stNames? "visible": "none"}}/>
-          { state.mapView.zoom > 16 && this.mapRef.current? 
+          { state.mapView.zoom > 16.5 && this.mapRef.current? 
           <Markers 
             inViewPort={(long, lat) => this.mapRef.current.getMap().getBounds().contains([long, lat])} />: null }
       </ReactMapGL>

@@ -37,10 +37,13 @@ const styles = drawerWidth => makeStyles((theme) => ({
     height: 30,
     width: "auto",
   },
+  noDisplay: {
+    display: "none",
+  }
 }));
 
 export default function Header(props) {
-  const { onClick, showMenu, drawerWidth, onAssessmentClick, badgeCount } = props;
+  const { onClick, showMenuButton, showMenu, drawerWidth, onAssessmentClick, badgeCount } = props;
   const classes = styles(drawerWidth)();
 
   return (
@@ -50,7 +53,7 @@ export default function Header(props) {
           edge="start"
           color="inherit" 
           onClick={onClick}
-          className={clsx(classes.menuButton, showMenu && classes.menuButtonHidden)}>
+          className={clsx(classes.menuButton, !showMenuButton && classes.noDisplay, showMenu && classes.menuButtonHidden)}>
             <MenuIcon />
         </IconButton>
         <div className={classes.title}>

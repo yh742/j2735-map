@@ -9,6 +9,7 @@ import { BrowserRouter, withRouter } from 'react-router-dom'
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles'
 
 import { SettingContextProvider } from "./Components/Store";
+import { MqttContextProvider }  from "./Components/MqttClient/MqttClient";
 
 const theme = createMuiTheme({
   typography: {
@@ -39,6 +40,7 @@ ReactDOM.render(
       <MuiThemeProvider theme={theme}>
         <CssBaseline />
         <SettingContextProvider>
+          <MqttContextProvider />
           <RouteAwareApp />
         </SettingContextProvider>
       </MuiThemeProvider>

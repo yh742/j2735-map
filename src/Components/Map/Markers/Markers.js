@@ -1,16 +1,13 @@
-import React, { useContext } from 'react';
+import React, { useContext } from 'react'
 import {SettingContext} from '../../Store'
 import Marker from './Marker/Marker'
-import Popup from './Popup/Popup'
 
 export default function Markers(props) {
     const [state] = useContext(SettingContext);
     const { inViewPort } = props;
-
     // only render markers that are in viewport 
     const inViewMarkers = Object.keys(state.markers)
         .filter(key => inViewPort(state.markers[key].long, state.markers[key].lat))
-    
     // translation animations have to be done with marker and rotation animations with images
     return (
         <>
@@ -22,18 +19,20 @@ export default function Markers(props) {
             return (
                 <div key={key}>
                 <Marker
+                    popup={state.vehPopup}
                     animateIcon={state.animateIcons} 
                     lat={lat} 
                     long={long}
                     msgType={obj.msgType} 
                     heading={obj.heading} 
                     zoom={state.mapView.zoom}
+                    speed={speed}
                     mapBearing={state.mapView.bearing} />
-                { state.vehPopup && <Popup 
+                {/* { state.vehPopup && state.mapMode.targetId !== key && <Popup 
                     animateIcon={state.animateIcons} 
                     speed={speed}
                     lat={lat} 
-                    long={long} />}
+                    long={long} />} */}
                 </div>
             )}): null }
         </>

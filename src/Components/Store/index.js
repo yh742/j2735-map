@@ -99,11 +99,38 @@ const reducer = (state, action) => {
             }
         case SettingActions.updateMarker:
             let count = Object.keys(action.payload).filter(key=> !(key in state.markers)).length;
+            let temp = {};
+            for (const key in state.markers) {
+                if (state.markers[key].ttl - 1 !== 0) {
+                    temp[key] = {
+                        ...state.markers[key],
+                        ttl: state.markers[key].ttl - 1,
+                    }
+                }   
+            }
+            if (!state.mapView.worldView && state.mapMode.targetId in state.markers) {
+                return {
+                    ...state,
+                    mapView: {
+                        latitude: state.markers[state.mapMode.targetId].lat,
+                        longitude: state.markers[state.mapMode.targetId].long,
+                        zoom: 19,
+                        transitionDuration: 200,
+                        bearing: state.markers[state.mapMode.targetId].heading,
+                        pitch: 0
+                    },
+                    newMessages: state.newMessages + count,
+                    markers: {
+                        ...temp,
+                        ...action.payload
+                    }
+                }
+            }
             return {
                 ...state,
                 newMessages: state.newMessages + count,
                 markers: {
-                    ...state.markers,
+                    ...temp,
                     ...action.payload
                 }
             }

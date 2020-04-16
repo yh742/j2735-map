@@ -1,8 +1,18 @@
+import { Component } from 'react';
+import { ParseLocation, ParseHeading, ParseSpeed } from '../Helper/Conversion';
 import mqtt from 'mqtt';
+import { SettingContext, SettingActions } from '../Store';
 
-export default class MqttClient {
-    constructor(batchCallBack, timer=5000) {
-        // TODO: handle error conditions as well
+export class MqttContextProvider extends Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            localBuffer: {}
+        }
+    }
+
+    componentDidMount() {
         this.client = mqtt.connect(window.production.server, {
             port: window.production.port,
             host: window.production.server,
@@ -14,26 +24,29 @@ export default class MqttClient {
                     console.log("couldn't subscribe to mqtt server")
                     return;
                 }
+                console.log("connected to mqtt");
                 this.client.on("message", this.handleMqttMessages);
             });
         });
-        this.localMarkerCache = {}
-        this.interval = setInterval(() => {
-            batchCallBack(this.localMarkerCache);
-            this.localMarkerCache = {};
-        }, timer);
+        this.interval = setInterval(this.timerCallback, 1000);
     }
 
-    parseLocation(position) {
-        return parseFloat(position) / 10e6;
+    timerCallback = () => {
+        const [, dispatch] = this.context;
+        dispatch({
+            type: SettingActions.updateMarker,
+            payload: {
+                ...this.state.localBuffer,
+            }
+        });
+        this.setState({
+            localBuffer: {},
+        });
     }
-    
-    parseHeading(heading) {
-        return parseFloat(heading) * 0.0125;
-    }
-    
-    parseSpeed(speed) {
-        return parseFloat(speed) * 0.072;
+
+    componentWillUnmount() {
+        if (this.client) this.client.end();
+        if (this.interval) clearInterval(this.interval);
     }
 
     handleMqttMessages = (topic, message) => {
@@ -46,7 +59,6 @@ export default class MqttClient {
           return;
         }
         if ("BasicSafetyMessage" in jsonObj.MessageFrame.value) {
-          // handle BSM messages here
           this.convertMessages(
             jsonObj.MessageFrame.value.BasicSafetyMessage.coreData,
             topic,
@@ -61,32 +73,27 @@ export default class MqttClient {
         }
     }
 
-    // TODO: parse partII of the BSM messages
     convertMessages = (msgObj, topic, msgType) => {
-        const {
-            heading, id, long, lat, speed
-        } = msgObj;
-        this.localMarkerCache = {
-            ...this.localMarkerCache,
+        const { heading, id, long, lat, speed } = msgObj;
+        this.setState(prevState => ({localBuffer: {
+            ...prevState.localBuffer,
             [id]: {
-            topic: topic,
-            msgType: msgType,
-            long: this.parseLocation(long),
-            lat: this.parseLocation(lat),
-            speed: this.parseSpeed(speed),
-            heading: this.parseHeading(heading),
-            expToken: 3,
-        }
-    }
+                topic: topic,
+                msgType: msgType,
+                long: ParseLocation(long),
+                lat: ParseLocation(lat),
+                speed: ParseSpeed(speed),
+                heading: ParseHeading(heading),
+                ttl: 9,
+            }
+        }}));   
     }
 
-    close() {
-        if (this.client) this.client.end();
-        if (this.interval) clearInterval(this.interval);
+    render() {
+        return null;
     }
-}
-
-    
+} 
+MqttContextProvider.contextType = SettingContext;
   
 
 
