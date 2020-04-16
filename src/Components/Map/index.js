@@ -18,11 +18,12 @@ const styles = (theme) => ({
   navControl: {
     position: 'absolute', 
     right: theme.spacing(1),
-    bottom: theme.spacing(8)
+    bottom: theme.spacing(4)
   }
 })
 
 const MAPBOX_TOKEN = window.production.mbToken;
+const MAPBOX_STYLE = window.production.mbStyle;
 
 class Map extends Component {
 
@@ -89,9 +90,10 @@ class Map extends Component {
 
   componentDidMount() {
     this.mqttClient = new MqttClient((cache) => {
-      const [, dispatch] = this.context;
+      console.log("dispatching markers");
+      const [,dispatch] = this.context;
       dispatch({
-        type: SettingActions.addMarker,
+        type: SettingActions.updateMarker,
         payload: cache
       });
     });
@@ -121,7 +123,7 @@ class Map extends Component {
         onInteractionStateChange={this.handleInteractions}
         onViewportChange={this.handleViewportChange}
         mapboxApiAccessToken={MAPBOX_TOKEN}
-        mapStyle="mapbox://styles/yh742/ck8tcx23g09pf1imf92m2wfko" 
+        mapStyle={MAPBOX_STYLE}
         height="100%"
         width="100%">
         <Geocoder 

@@ -1,14 +1,13 @@
-import React, {useContext} from 'react';
+import React, {useContext, useState} from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
-import {ListSubheader }  from '@material-ui/core'
+import { ListSubheader, Button }  from '@material-ui/core'
 import { SettingContext, SettingActions } from '../Store'
 import Drawer from '@material-ui/core/Drawer';
 import AnimationStopper from '../Helper/Animation';
 
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import VideocamIcon from '@material-ui/icons/Videocam';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import LocalTaxiIcon from '@material-ui/icons/LocalTaxi';
@@ -39,7 +38,15 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   trackIconContainer: {
-    minWidth: "40px"
+    minWidth: "40px",
+    paddingBottom: theme.spacing(3),
+  },
+  button: {
+    fontSize: '9px',
+    minWidth: '0px',
+    paddingLeft: "8px",
+    paddingRight: "8px",
+   // backgroundColor: 'white',
   },
   trackIcon: {
     width: "20px",
@@ -47,32 +54,35 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const maxStringLength = 20;
+const maxStringLength = 13;
 
 export default function AssessmentDrawer(props) {
   const classes = useStyles();
   const {showMenu} = props;
   const [state, dispatch] = useContext(SettingContext);
+  const [selected, setSelected] = useState(null);
 
-  const handleClick = (id) => {
+  const handleItemClick = (item) => {
     AnimationStopper(state, dispatch);
-    if (id !== state.mapMode.targetId) {
-      dispatch({
-        type: SettingActions.setMapMode,
-        payload: {
-            worldView: false,
-            targetId: id,
-        }
-      });
-    } else {
-      dispatch({
-        type: SettingActions.setMapMode,
-        payload: {
-            worldView: true,
-            targetId: null,
-        }
-      });
-    }
+    dispatch({
+      type: SettingActions.setMapView,
+      payload: {
+        longitude: item.long,
+        latitude: item.lat,
+      }
+    });
+  }
+
+  const handleButtonClick = (event, id) => {
+    event.stopPropagation();
+    setSelected(id);
+    dispatch({
+      type: SettingActions.setMapMode,
+      payload: {
+        worldView: false,
+        targetId: id,
+      }
+    });
   }
 
   return (
@@ -87,22 +97,26 @@ export default function AssessmentDrawer(props) {
           </div>
           <List>
             <ListSubheader inset>Message Sources</ListSubheader>
-            {
-              Object.keys(state.markers).length > 0? 
+            { Object.keys(state.markers).length > 0? 
               Object.keys(state.markers).map(key => (
-                <ListItem button key={key} onClick={() => handleClick(key)}>
+                <ListItem button key={key} onClick={()=> handleItemClick(state.markers[key])}>
                   <ListItemIcon className={classes.listIcon}>
                     {state.markers[key].msgType === "BSM"? <LocalTaxiIcon />: <AccessibilityIcon />}
                   </ListItemIcon>
                 <ListItemText
+                  primaryTypographyProps={{variant: 'subtitle1'}}
+                  secondaryTypographyProps={{variant: 'caption'}}
                   primary={key} 
                   secondary={
                     state.markers[key].topic.length <= maxStringLength? 
                     state.markers[key].topic: 
-                    state.markers[key].topic.substring(0, maxStringLength) + "..." 
-                    } />
-                { key === state.mapMode.targetId ? 
-                  <ListItemIcon classes={{root:classes.trackIconContainer}}><VideocamIcon className={classes.trackIcon} /></ListItemIcon> : null }
+                    state.markers[key].topic.substring(0, maxStringLength) + "..." } />
+                <Button 
+                  onClick={(evt)=>handleButtonClick(evt, key)} 
+                  variant={key === selected? "contained": "outlined"} 
+                  size="small" 
+                  color="primary" 
+                  className={classes.button}>Track</Button>
               </ListItem>)): 
               <ListItem key="empty">
                   <ListItemIcon>

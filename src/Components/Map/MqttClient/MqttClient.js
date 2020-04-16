@@ -1,7 +1,7 @@
 import mqtt from 'mqtt';
 
 export default class MqttClient {
-    constructor(batchCallBack, timer=1000) {
+    constructor(batchCallBack, timer=5000) {
         // TODO: handle error conditions as well
         this.client = mqtt.connect(window.production.server, {
             port: window.production.port,
@@ -75,6 +75,7 @@ export default class MqttClient {
             lat: this.parseLocation(lat),
             speed: this.parseSpeed(speed),
             heading: this.parseHeading(heading),
+            expToken: 3,
         }
     }
     }

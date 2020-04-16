@@ -10,7 +10,7 @@ export const SettingActions = {
     setState: "SET_STATE",
     restoreState: "RESTORE_STATE",
     clearHistory: "CLEAR_HISTORY",
-    addMarker: "ADD_MARKER",
+    updateMarker: "UPDATE_MARKER",
     clearNotification: "CLEAR_NOTIFICATION",
     setAnimation: "SET_ANIMATION",
     setMapMode: "SET_MAP_MODE",
@@ -97,14 +97,14 @@ const reducer = (state, action) => {
                     ...action.payload,
                 }
             }
-        case SettingActions.addMarker:
+        case SettingActions.updateMarker:
             let count = Object.keys(action.payload).filter(key=> !(key in state.markers)).length;
             return {
                 ...state,
                 newMessages: state.newMessages + count,
                 markers: {
                     ...state.markers,
-                    ...action.payload,
+                    ...action.payload
                 }
             }
         case SettingActions.restoreState:

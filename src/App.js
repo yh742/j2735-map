@@ -30,9 +30,9 @@ const styles = (theme) => ({
     display: "none",
   },
   mapContainer: {
-    position: "fixed",
-    // height: `calc(100% -48px)`,
-    height: '100%',
+    // position: "fixed",
+    height: `calc(100% - 48px)`,
+    // height: '100%',
     width: '100%'
   }
 })
