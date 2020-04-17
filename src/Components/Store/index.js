@@ -11,7 +11,7 @@ export const SettingActions = {
     restoreState: "RESTORE_STATE",
     clearHistory: "CLEAR_HISTORY",
     updateMarker: "UPDATE_MARKER",
-    clearNotification: "CLEAR_NOTIFICATION",
+    setNotification: "SET_NOTIFICATION",
     setAnimation: "SET_ANIMATION",
     setMapMode: "SET_MAP_MODE",
 }
@@ -50,7 +50,10 @@ const initialState = {
         pitch: 0
     },
     markers: {},
-    newMessages: 0,
+    notification: {
+        newMessages: 0,
+        listen: true,
+    },
     animateIcons: true,
     mapMode: {
         worldView: true,
@@ -84,10 +87,12 @@ const reducer = (state, action) => {
                 ...state,
                 history: []
             }
-        case SettingActions.clearNotification:
+        case SettingActions.setNotification:
             return {
                 ...state,
-                newMessages: 0,
+                notification: {
+                    ...action.payload
+                }
             }
         case SettingActions.setMapView:
             return {
@@ -98,7 +103,10 @@ const reducer = (state, action) => {
                 }
             }
         case SettingActions.updateMarker:
-            let count = Object.keys(action.payload).filter(key=> !(key in state.markers)).length;
+            let count = 0;
+            if (state.notification.listen){
+                count = Object.keys(action.payload).filter(key=> !(key in state.markers)).length;
+            }
             let temp = {};
             for (const key in state.markers) {
                 if (state.markers[key].ttl - 1 !== 0) {
@@ -112,14 +120,18 @@ const reducer = (state, action) => {
                 return {
                     ...state,
                     mapView: {
+                        ...state.mapView,
                         latitude: state.markers[state.mapMode.targetId].lat,
                         longitude: state.markers[state.mapMode.targetId].long,
                         zoom: 19,
-                        transitionDuration: 200,
-                        bearing: state.markers[state.mapMode.targetId].heading,
+                        transitionDuration: 2000,
+                        //bearing: state.markers[state.mapMode.targetId].heading,
                         pitch: 0
                     },
-                    newMessages: state.newMessages + count,
+                    notification: {
+                        ...state.notification,
+                        newMessages: state.notification.newMessages + count,
+                    },
                     markers: {
                         ...temp,
                         ...action.payload
@@ -128,7 +140,10 @@ const reducer = (state, action) => {
             }
             return {
                 ...state,
-                newMessages: state.newMessages + count,
+                notification: {
+                    ...state.notification,
+                    newMessages: state.notification.newMessages + count,
+                },
                 markers: {
                     ...temp,
                     ...action.payload
@@ -147,7 +162,10 @@ const reducer = (state, action) => {
                     return {
                         ...settingObj,
                         markers: {},
-                        newMessages: 0,
+                        notification: {
+                            newMessages: 0,
+                            listen: true
+                        },
                         mapMode: {
                             worldView: true,
                             targetId: null,

@@ -8,7 +8,7 @@ import RoadLabels from './Assets/Layers/RoadLabels'
 
 
 import Geocoder from 'react-map-gl-geocoder'
-import ReactMapGL, { Layer, NavigationControl, LinearInterpolator, FlyToInterpolator } from "react-map-gl"
+import ReactMapGL, { Layer, NavigationControl, LinearInterpolator } from "react-map-gl"
 
 import AnimationStopper from '../Helper/Animation'
 

@@ -13,22 +13,24 @@ export class MqttContextProvider extends Component {
     }
 
     componentDidMount() {
+        console.log("mqtt client mounting");
         this.client = mqtt.connect(window.production.server, {
             port: window.production.port,
             host: window.production.server,
+            keepalive: 0,
             clientId: 'mqttjs_' + Math.random().toString(16).substr(2, 8),
         }).on("connect", () => {
+            console.log("connected to mqtt", this.client);
             this.client.subscribe(window.production.topic, (err) => {
                 if (err) {
                     // TODO: need to make notification for errors
                     console.log("couldn't subscribe to mqtt server")
                     return;
                 }
-                console.log("connected to mqtt");
                 this.client.on("message", this.handleMqttMessages);
             });
         });
-        this.interval = setInterval(this.timerCallback, 1000);
+        this.interval = setInterval(this.timerCallback, window.production.animate);
     }
 
     timerCallback = () => {
@@ -45,6 +47,7 @@ export class MqttContextProvider extends Component {
     }
 
     componentWillUnmount() {
+        console.log("mqtt client unmounting");
         if (this.client) this.client.end();
         if (this.interval) clearInterval(this.interval);
     }
@@ -52,6 +55,7 @@ export class MqttContextProvider extends Component {
     handleMqttMessages = (topic, message) => {
         let jsonString = new TextDecoder('utf-8').decode(message)
         let jsonObj;
+        
         try {
           jsonObj = JSON.parse(jsonString);
         } catch (e) {
@@ -61,13 +65,16 @@ export class MqttContextProvider extends Component {
         if ("BasicSafetyMessage" in jsonObj.MessageFrame.value) {
           this.convertMessages(
             jsonObj.MessageFrame.value.BasicSafetyMessage.coreData,
-            topic,
+            jsonObj.MessageFrame.source? jsonObj.MessageFrame.source: topic,
             "BSM"
             );
         } else if ("PersonalSafetyMessage" in jsonObj.MessageFrame.value){
           this.convertMessages(
-            jsonObj.MessageFrame.value.PersonalSafetyMessage,
-            topic, 
+            {
+                ...jsonObj.MessageFrame.value.PersonalSafetyMessage,
+                ...jsonObj.MessageFrame.value.PersonalSafetyMessage.position
+            },
+            jsonObj.MessageFrame.source? jsonObj.MessageFrame.source: topic,
             "PSM"
           );
         }
@@ -84,7 +91,7 @@ export class MqttContextProvider extends Component {
                 lat: ParseLocation(lat),
                 speed: ParseSpeed(speed),
                 heading: ParseHeading(heading),
-                ttl: 9,
+                ttl: window.production.ttl,
             }
         }}));   
     }

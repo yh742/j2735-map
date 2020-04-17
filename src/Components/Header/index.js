@@ -10,18 +10,18 @@ import { ReactComponent as Logo } from "./Assets/logo.svg";
 const styles = drawerWidth => makeStyles((theme) => ({
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
+    // transition: theme.transitions.create(['width', 'margin'], {
+    //   easing: theme.transitions.easing.sharp,
+    //   duration: theme.transitions.duration.leavingScreen,
+    // }),
   },
   appBarShift: {
     marginLeft: drawerWidth,
     width: `calc(100% - ${drawerWidth}px)`,
-    transition: theme.transitions.create(['width', 'margin'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
+    // transition: theme.transitions.create(['width', 'margin'], {
+    //   easing: theme.transitions.easing.sharp,
+    //   duration: theme.transitions.duration.enteringScreen,
+    // }),
   },
   menuButton: {
     marginRight: theme.spacing(4),
@@ -53,7 +53,7 @@ export default function Header(props) {
           edge="start"
           color="inherit" 
           onClick={onClick}
-          className={clsx(classes.menuButton, !showMenuButton && classes.noDisplay, showMenu && classes.menuButtonHidden)}>
+          className={clsx(!showMenuButton && classes.noDisplay, classes.menuButton, showMenu && classes.menuButtonHidden)}>
             <MenuIcon />
         </IconButton>
         <div className={classes.title}>

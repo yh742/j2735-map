@@ -19,6 +19,7 @@ export default function Markers(props) {
             return (
                 <div key={key}>
                 <Marker
+                    highlight={key === state.mapMode.targetId? true: false}
                     popup={state.vehPopup}
                     animateIcon={state.animateIcons} 
                     lat={lat} 
@@ -28,11 +29,6 @@ export default function Markers(props) {
                     zoom={state.mapView.zoom}
                     speed={speed}
                     mapBearing={state.mapView.bearing} />
-                {/* { state.vehPopup && state.mapMode.targetId !== key && <Popup 
-                    animateIcon={state.animateIcons} 
-                    speed={speed}
-                    lat={lat} 
-                    long={long} />} */}
                 </div>
             )}): null }
         </>

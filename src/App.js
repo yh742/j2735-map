@@ -65,7 +65,7 @@ class App extends Component {
   onLoadingCallback = () => {
     const [state,] = this.context;
     console.log("saving state...", state);
-    localStorage.setItem("lastSettingState", JSON.stringify(state));
+    localStorage.setItem("lastSettingState", JSON.stringify({...state, markers:{}}));
   }
 
   handleMenuToggle = () => {
@@ -79,9 +79,23 @@ class App extends Component {
     this.setState(prevState => ({
       showAssessment: !prevState.showAssessment,
     }), () => {
-      if (this.state.showAssessment) dispatch({
-        type: SettingActions.clearNotification
-      });
+      if (this.state.showAssessment) {
+        dispatch({
+          type: SettingActions.setNotification,
+          payload: {
+            newMessages: 0,
+            listen: false
+          }
+        });
+      } else {
+        dispatch({
+          type: SettingActions.setNotification,
+          payload: {
+            newMessages: 0,
+            listen: true
+          }
+        });
+      }
     });
   }
 
@@ -95,9 +109,9 @@ class App extends Component {
         <Header onClick={this.handleMenuToggle} 
           showMenuButton={state.mapMode.worldView}
           onAssessmentClick={this.handleAssessmentToggle} 
-          badgeCount={state.newMessages}
+          badgeCount={state.notification.newMessages}
           drawerWidth={App.getDrawerWidth()}
-          showMenu={this.state.showMenu} /> 
+          showMenu={state.mapMode.worldView && this.state.showMenu} /> 
         { 
           state.mapMode.worldView? 
             (<DrawerMenu onClick={this.handleMenuToggle} showMenu={this.state.showMenu} drawerWidth={App.getDrawerWidth()}/>)
