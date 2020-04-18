@@ -41,6 +41,7 @@ export default React.memo(({ highlight, popup, animateIcon, lat, long, msgType, 
             src={msgType === "BSM"? CarIcon: PedIcon}
             // className={clsx(animateIcon && classes.transition)} 
             style={{
+                filter: highlight? "drop-shadow(0px 0px 7px rgba(255, 255, 255, 1))": "none",
                 opacity: highlight? "1": "0.5",
                 width: "auto",
                 height: `${ScaleMarker(lat, zoom, msgType)}px`,

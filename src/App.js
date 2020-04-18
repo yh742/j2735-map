@@ -7,7 +7,7 @@ import './css/mapbox/mapbox-gl-geocoder.css';
 import { SettingContext, SettingActions } from "./Components/Store";
 import Header from "./Components/Header";
 import DrawerMenu from "./Components/Menu";
-import AssessmentDrawer from "./Components/Assessment";
+import MessageMenu from "./Components/MessageMenu";
 import { withStyles } from '@material-ui/core';
 import { Route, Switch, Redirect } from 'react-router-dom';
 
@@ -42,7 +42,7 @@ class App extends Component {
     super(props);
     this.state = {
       showMenu: false,
-      showAssessment: false,
+      showMessageMenu: false,
     };
   }
 
@@ -74,12 +74,12 @@ class App extends Component {
     }));
   }
 
-  handleAssessmentToggle = () => {
+  handleMessageMenuToggle = () => {
     const [, dispatch] = this.context;
     this.setState(prevState => ({
-      showAssessment: !prevState.showAssessment,
+      showMessageMenu: !prevState.showMessageMenu,
     }), () => {
-      if (this.state.showAssessment) {
+      if (this.state.showMessageMenu) {
         dispatch({
           type: SettingActions.setNotification,
           payload: {
@@ -108,7 +108,7 @@ class App extends Component {
       <div className={classes.root}>
         <Header onClick={this.handleMenuToggle} 
           showMenuButton={state.mapMode.worldView}
-          onAssessmentClick={this.handleAssessmentToggle} 
+          onAssessmentClick={this.handleMessageMenuToggle} 
           badgeCount={state.notification.newMessages}
           drawerWidth={App.getDrawerWidth()}
           showMenu={state.mapMode.worldView && this.state.showMenu} /> 
@@ -127,7 +127,7 @@ class App extends Component {
             <Redirect to="/" />
           </Switch>
         </main>
-        <AssessmentDrawer showMenu={this.state.showAssessment} />
+        <MessageMenu showMenu={this.state.showMessageMenu} />
       </div>
     )
   }

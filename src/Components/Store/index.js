@@ -123,8 +123,8 @@ const reducer = (state, action) => {
                         ...state.mapView,
                         latitude: state.markers[state.mapMode.targetId].lat,
                         longitude: state.markers[state.mapMode.targetId].long,
-                        zoom: 19,
-                        transitionDuration: 2000,
+                        zoom: 19.5,
+                        transitionDuration: window.production.animate,
                         //bearing: state.markers[state.mapMode.targetId].heading,
                         pitch: 0
                     },
