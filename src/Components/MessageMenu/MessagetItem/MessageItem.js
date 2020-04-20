@@ -28,10 +28,10 @@ const truncateLabel = (topic) => {
     return topic.length <= 13? topic: topic.substring(0, maxStringLength) + "..." 
 }
 
-export default React.memo(({ id, worldView, itemClick, buttonClick, msgType, topic }) => {
+export default React.memo(({ id, worldView, itemClick, buttonClick, msgType, topic, selected }) => {
     const classes = useStyles();
     return (
-        <ListItem button={worldView} onClick={()=> {if (worldView) itemClick(id)}}>
+        <ListItem button={worldView} onClick={()=> {if (worldView) itemClick(id)}} selected={selected}>
             <ListItemIcon className={classes.listIcon}>
             {msgType === "BSM"? <LocalTaxiIcon />: <AccessibilityIcon />}
             </ListItemIcon>

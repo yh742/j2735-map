@@ -1,4 +1,4 @@
-import React, {useContext} from 'react';
+import React, {useContext, useState} from 'react';
 import clsx from 'clsx';
 
 import AnimationStopper from '../Helper/Animation';
@@ -42,16 +42,41 @@ export default function MessageMenu(props) {
   const classes = useStyles();
   const {showMenu} = props;
   const [state, dispatch] = useContext(SettingContext);
+  const [selected, setSelected] = useState(null);
+  const targetId =  state.mapMode.targetId;
+  const valid = targetId in state.markers;
 
   const handleItemClick = (key) => {
+    // stop animation to move viewport
     AnimationStopper(state, dispatch);
+    // change viewport center location
     dispatch({
       type: SettingActions.setMapView,
       payload: {
         longitude: state.markers[key].long,
         latitude: state.markers[key].lat,
+        transitionDuration: 0,
       }
     });
+    if (selected === key) {
+      // de-select menu item and take off highlight marker
+      setSelected(null);
+      dispatch({
+        type: SettingActions.setMapMode,
+        payload: {
+          targetId: null,
+        }
+      });
+    } else {
+      // select menu item and highlight marker
+      setSelected(key);
+      dispatch({
+        type: SettingActions.setMapMode,
+        payload: {
+          targetId: key,
+        }
+      });
+    }
   }
 
   const handleButtonClick = (event, id) => {
@@ -73,6 +98,7 @@ export default function MessageMenu(props) {
         targetId: id,
       }
     });
+
   }
   
   const handleStopButtonClick = () => {
@@ -92,8 +118,6 @@ export default function MessageMenu(props) {
     });
   }
 
-  const targetId =  state.mapMode.targetId;
-  const valid = targetId in state.markers;
   return (
     <>
       { showMenu === true ? (
@@ -108,7 +132,7 @@ export default function MessageMenu(props) {
               ( <TrackingMenu 
                   id={targetId}
                   ttl={valid? state.markers[targetId].ttl: "0"}
-                  topic={valid? state.markers[targetId].topic: "Source is inactive"}
+                  topic={valid? state.markers[targetId].topic: "Inactive"}
                   long={valid? state.markers[targetId].long.toFixed(4) + "°": "-"}
                   lat={valid? state.markers[targetId].lat.toFixed(4) + "°": "-"}
                   speed={valid? state.markers[targetId].speed.toFixed(2) + " km/h": "-"}
@@ -121,6 +145,7 @@ export default function MessageMenu(props) {
                   <MessageItem 
                     key={key} 
                     id={key}
+                    selected={key === selected}
                     worldView={state.mapMode.worldView} 
                     itemClick={handleItemClick}
                     buttonClick={handleButtonClick}

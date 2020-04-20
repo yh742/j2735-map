@@ -76,11 +76,11 @@ const reducer = (state, action) => {
             };
         case SettingActions.addHistory:
             console.log(SettingActions.addHistory, state.history, action.payload);
-            // (1) move duplicate searches to top (2) limit history items to 8
+            // (1) filter out duplicate searches (2) limit history items to 8
             let filtered = state.history.filter(item => item.id !== action.payload.id).slice(0,7);
             return {
                 ...state,
-                history: [action.payload, ...cloneDeep(filtered)]
+                history: [action.payload, ...filtered]
             };
         case SettingActions.clearHistory:
             return {
@@ -116,7 +116,7 @@ const reducer = (state, action) => {
                     }
                 }   
             }
-            if (!state.mapView.worldView && state.mapMode.targetId in state.markers) {
+            if (!state.mapMode.worldView && state.mapMode.targetId in state.markers) {
                 return {
                     ...state,
                     mapView: {
@@ -195,6 +195,7 @@ const reducer = (state, action) => {
             return {
                 ...state,
                 mapMode: {
+                    ...state.mapMode,
                     ...action.payload,
                 }
             }
