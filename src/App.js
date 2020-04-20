@@ -4,6 +4,7 @@ import clsx from 'clsx';
 import './css/mapbox/mapbox-gl.css';
 import './css/mapbox/mapbox-gl-geocoder.css';
 
+import ErrorNotification from './Components/ErrorNotification/ErrorNotification';
 import { SettingContext, SettingActions } from "./Components/Store";
 import Header from "./Components/Header";
 import DrawerMenu from "./Components/Menu";
@@ -112,11 +113,9 @@ class App extends Component {
           badgeCount={state.notification.newMessages}
           drawerWidth={App.getDrawerWidth()}
           showMenu={state.mapMode.worldView && this.state.showMenu} /> 
-        { 
-          state.mapMode.worldView? 
+        { state.mapMode.worldView? 
             (<DrawerMenu onClick={this.handleMenuToggle} showMenu={this.state.showMenu} drawerWidth={App.getDrawerWidth()}/>)
-            : null
-        }
+            : null }
         <main className={classes.content}>
           <div className={classes.appBarSpacer} />
           <div className={clsx(showMap && classes.mapContainer)}>
@@ -127,6 +126,7 @@ class App extends Component {
             <Redirect to="/" />
           </Switch>
         </main>
+        <ErrorNotification />
         <MessageMenu showMenu={this.state.showMessageMenu} />
       </div>
     )

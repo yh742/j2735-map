@@ -1,5 +1,5 @@
 import React, { useReducer, createContext } from 'react';
-import * as cloneDeep from 'lodash/cloneDeep';
+// import * as cloneDeep from 'lodash/cloneDeep';
 
 export const SettingContext = createContext();
 
@@ -14,6 +14,9 @@ export const SettingActions = {
     setNotification: "SET_NOTIFICATION",
     setAnimation: "SET_ANIMATION",
     setMapMode: "SET_MAP_MODE",
+    addError: "ADD_ERROR",
+    removeError: "REMOVE_ERROR",
+    processError: "PROCESS_ERROR",
 }
 
 const schema = {
@@ -58,7 +61,11 @@ const initialState = {
     mapMode: {
         worldView: true,
         targetId: null,
-    }
+    },
+    error: {
+        message: "",
+        queue: [],
+    },
 };
 
 export const ValidateSettings = (obj) =>
@@ -176,7 +183,11 @@ const reducer = (state, action) => {
                             zoom: zoom,
                             bearing: bearing,
                             pitch: pitch
-                        }
+                        },
+                        error: {
+                            message: "",
+                            queue: [],
+                        },
                     }
                 } else {
                     console.log("ERROR: cannot set object")
@@ -197,6 +208,41 @@ const reducer = (state, action) => {
                 mapMode: {
                     ...state.mapMode,
                     ...action.payload,
+                }
+            }
+        case SettingActions.addError:
+            console.log(state.error, action.payload);
+            if (state.error.message === "") {
+                return {
+                    ...state,
+                    error: {
+                        ...state.error,
+                        message: action.payload,
+                    }
+                }
+            } else {
+                return {
+                    ...state,
+                    error: {
+                        ...state.error,
+                        queue: [...state.error.queue, action.payload] 
+                    }
+                }
+            }
+        case SettingActions.processError:
+            return  {
+                ...state,
+                error: {
+                    message: state.error.queue.length > 0? state.error.queue[0]: "",
+                    queue: state.error.queue.slice(1),
+                }
+            }
+        case SettingActions.removeError: 
+            return {
+                ...state,
+                error: {
+                    ...state.error,
+                    message: "",
                 }
             }
         default:

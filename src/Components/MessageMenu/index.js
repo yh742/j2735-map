@@ -47,8 +47,9 @@ export default function MessageMenu(props) {
   const valid = targetId in state.markers;
 
   const handleItemClick = (key) => {
+    console.log("clicked");
     // stop animation to move viewport
-    AnimationStopper(state, dispatch);
+    AnimationStopper(state, dispatch, 300);
     // change viewport center location
     dispatch({
       type: SettingActions.setMapView,
@@ -77,6 +78,10 @@ export default function MessageMenu(props) {
         }
       });
     }
+    dispatch({
+      type: SettingActions.addError,
+      payload: " THISDF IS A TEST MESSAGE!!!!" + key,
+    })
   }
 
   const handleButtonClick = (event, id) => {
