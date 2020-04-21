@@ -17,14 +17,12 @@ export default function MessageMenu(props) {
   const [state, dispatch] = useContext(SettingContext);
   
   const handleClose = () => {
-      console.log("1");
       dispatch({
           type: SettingActions.removeError
       })
   }
   
   const handleExit = () => {
-    console.log("2");
       dispatch({
           type: SettingActions.processError
       })
@@ -45,7 +43,7 @@ export default function MessageMenu(props) {
         action={
         <React.Fragment>
             <ErrorIcon />
-            <IconButton size="small" aria-label="close" color="inherit">
+            <IconButton size="small" aria-label="close" onClick={handleClose} color="inherit">
                 <CloseIcon fontSize="small" />
             </IconButton>
         </React.Fragment>

@@ -3,6 +3,7 @@ import { SettingContext, SettingActions} from '../Store'
 import Markers from './Markers/Markers'
 import { Component } from "react";
 import { withStyles } from '@material-ui/core'
+import BufferedMQTTClient from '../Helper/BufferedMqttClient';
 
 import RoadLabels from './Assets/Layers/RoadLabels'
 
@@ -87,10 +88,38 @@ class Map extends Component {
     }
   }
 
+  componentDidMount() {
+    const [ state, dispatch ] = this.context;
+    this.client = new BufferedMQTTClient(
+      () => {
+          dispatch((msg) => ({
+              type: SettingActions.addError,
+              payload: msg,
+          }))
+      },
+      (buffer) => {
+          dispatch({
+              type: SettingActions.updateMarker,
+              payload: buffer,
+          });
+          let count = 0;
+          count = Object.keys(buffer).filter(key=> !(key in state.markers)).length;
+          dispatch({
+              type: SettingActions.incrementNotification,
+              payload: count,
+          });
+          this.client.clearBuffer()
+      }
+    );
+  }
+
+  componentWillUnmount() {
+    if (this.client) this.client.disconnect();
+  }
+
   render() {
     const {classes} = this.props;
     const [ state ] = this.context;
-
     return (
       <ReactMapGL
         ref={this.mapRef}

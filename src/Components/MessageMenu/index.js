@@ -1,20 +1,20 @@
-import React, {useContext, useState} from 'react';
+import React, { Component } from 'react';
 import clsx from 'clsx';
+
 
 import AnimationStopper from '../Helper/Animation';
 import EmptyItem from './EmptyItem/EmptyItem';
 import MessageItem from './MessagetItem/MessageItem';
 import TrackingMenu from './TrackingMenu/TrackingMenu';
+import MessageMenuHeader from './MessageMenuHeader/MessageMenuHeader';
 import { SettingContext, SettingActions } from '../Store'
 
 import List from '@material-ui/core/List';
 import Drawer from '@material-ui/core/Drawer';
-import { makeStyles } from '@material-ui/core/styles';
-import { Typography }  from '@material-ui/core'
-
+import { withStyles } from '@material-ui/core/styles';
 const drawerWidth = 260;
 
-const useStyles = makeStyles((theme) => ({
+const styles =(theme) => ({
   drawerPaper: {
     height: "100vh",
     overflow: "scroll",
@@ -34,23 +34,43 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: "16px"
   },
   toolbarSpacer: {
-    marginTop: theme.spacing(7),
+    marginTop: theme.spacing(6),
   },
-}));
+});
 
-export default function MessageMenu(props) {
-  const classes = useStyles();
-  const {showMenu} = props;
-  const [state, dispatch] = useContext(SettingContext);
-  const [selected, setSelected] = useState(null);
-  const targetId =  state.mapMode.targetId;
-  const valid = targetId in state.markers;
+class MessageMenu extends Component {
 
-  const handleItemClick = (key) => {
-    console.log("clicked");
+  constructor(props) {
+    super(props);
+    this.state = {
+      selected: null,
+      snapshot: {
+        mapMode: {},
+        markers: {},
+      },
+    }
+  }
+
+  refresh = () => {
+    const [ state ] = this.context;
+    this.setState({
+      snapshot: state,
+    });
+  }
+
+  handleItemClick = (key) => {
+    const [ state, dispatch ] = this.context;
     // stop animation to move viewport
     AnimationStopper(state, dispatch, 300);
     // change viewport center location
+    if (!(key in state.markers)) {
+      this.setState({ selected: null });
+      dispatch({
+        type: SettingActions.addError,
+        payload: `Marker "${key}" doesn't exist on map anymore!`
+      });
+      return;
+    }
     dispatch({
       type: SettingActions.setMapView,
       payload: {
@@ -59,9 +79,11 @@ export default function MessageMenu(props) {
         transitionDuration: 0,
       }
     });
-    if (selected === key) {
+
+    console.log(state.markers[key].topic);
+    if (this.state.selected === key) {
       // de-select menu item and take off highlight marker
-      setSelected(null);
+      this.setState({ selected: null });
       dispatch({
         type: SettingActions.setMapMode,
         payload: {
@@ -70,7 +92,7 @@ export default function MessageMenu(props) {
       });
     } else {
       // select menu item and highlight marker
-      setSelected(key);
+      this.setState({ selected: key });
       dispatch({
         type: SettingActions.setMapMode,
         payload: {
@@ -78,88 +100,96 @@ export default function MessageMenu(props) {
         }
       });
     }
-    dispatch({
-      type: SettingActions.addError,
-      payload: " THISDF IS A TEST MESSAGE!!!!" + key,
-    })
   }
 
-  const handleButtonClick = (event, id) => {
-    event.stopPropagation();
-    AnimationStopper(state, dispatch, 1500);
-    dispatch({
-      type: SettingActions.setMapView,
-      payload: {
-        longitude: state.markers[id].long,
-        latitude: state.markers[id].lat,
-        bearing: state.markers[id].heading,
-        transitionDuration: 0,
-      }
-    });
-    dispatch({
-      type: SettingActions.setMapMode,
-      payload: {
-        worldView: false,
-        targetId: id,
-      }
-    });
-
+  handleButtonClick = (event, id) => {
+    // const [ state, dispatch ] = this.context;
+    // event.stopPropagation();
+    // AnimationStopper(state, dispatch, 1500);
+    // dispatch({
+    //   type: SettingActions.setMapView,
+    //   payload: {
+    //     longitude: state.markers[id].long,
+    //     latitude: state.markers[id].lat,
+    //     bearing: state.markers[id].heading,
+    //     transitionDuration: 0,
+    //   }
+    // });
+    // dispatch({
+    //   type: SettingActions.setMapMode,
+    //   payload: {
+    //     worldView: false,
+    //     targetId: id,
+    //   }
+    // });
   }
   
-  const handleStopButtonClick = () => {
-    AnimationStopper(state, dispatch, 1500);
-    dispatch({
-      type: SettingActions.setMapMode,
-      payload: {
-        worldView: true,
-        targetId: null,
-      }
-    });
-    dispatch({
-      type: SettingActions.setMapView,
-      payload: {
-        transitionDuration: 0,
-      }
-    });
+  handleStopButtonClick = () => {
+    // const [ state, dispatch ] = this.context;
+    // AnimationStopper(state, dispatch, 1500);
+    // dispatch({
+    //   type: SettingActions.setMapMode,
+    //   payload: {
+    //     worldView: true,
+    //     targetId: null,
+    //   }
+    // });
+    // dispatch({
+    //   type: SettingActions.setMapView,
+    //   payload: {
+    //     transitionDuration: 0,
+    //   }
+    // });
   }
 
-  return (
-    <>
-      { showMenu === true ? (
-        <Drawer
-          classes={{paper: clsx(classes.drawerPaper, !showMenu && classes.drawerPaperClose)}}
-          variant="persistent"
-          anchor="right"
-          open={showMenu}>
-          <div className={classes.toolbarSpacer} />
-          <Typography className={classes.menuTitle} variant="body1" align="center" display="block">Message Tracker</Typography>
-            { !state.mapMode.worldView?
-              ( <TrackingMenu 
-                  id={targetId}
-                  ttl={valid? state.markers[targetId].ttl: "0"}
-                  topic={valid? state.markers[targetId].topic: "Inactive"}
-                  long={valid? state.markers[targetId].long.toFixed(4) + "°": "-"}
-                  lat={valid? state.markers[targetId].lat.toFixed(4) + "°": "-"}
-                  speed={valid? state.markers[targetId].speed.toFixed(2) + " km/h": "-"}
-                  heading={valid? state.markers[targetId].heading.toFixed(1) + "°": "-"}
-                  handleStopButtonClick={handleStopButtonClick}
-                />) : null }
-          <List dense>
-            { Object.keys(state.markers).length > 0 
-                ? Object.keys(state.markers).map(key => ( 
-                  <MessageItem 
-                    key={key} 
-                    id={key}
-                    selected={key === selected}
-                    worldView={state.mapMode.worldView} 
-                    itemClick={handleItemClick}
-                    buttonClick={handleButtonClick}
-                    msgType={state.markers[key].msgType} 
-                    topic={state.markers[key].topic} />))
-                : <EmptyItem /> }
-          </List>
-        </Drawer>)  : null
-      }
-    </>
-  );
+  componentDidUpdate(prevProps) {
+    const [ state ] = this.context;
+    if (this.props.showMenu === true && prevProps.showMenu !== true) {
+      this.setState({
+        snapshot: state,
+      });
+    }
+  }
+
+  render() {
+    const {classes, showMenu} = this.props;
+    let targetId =  this.state.snapshot.mapMode.targetId;
+    let valid = targetId in this.state.snapshot.markers;
+    return ( showMenu?
+      <Drawer
+        classes={{paper: clsx(classes.drawerPaper, !showMenu && classes.drawerPaperClose)}}
+        variant="persistent"
+        anchor="right"
+        open={showMenu}>
+        <div className={classes.toolbarSpacer} />
+          { !this.state.snapshot.mapMode.worldView?
+            ( <TrackingMenu 
+                id={targetId}
+                ttl={valid? this.state.snapshot.markers[targetId].ttl: "0"}
+                topic={valid? this.state.snapshot.markers[targetId].topic: "Inactive"}
+                long={valid? this.state.snapshot.markers[targetId].long.toFixed(4) + "°": "-"}
+                lat={valid? this.state.snapshot.markers[targetId].lat.toFixed(4) + "°": "-"}
+                speed={valid? this.state.snapshot.markers[targetId].speed.toFixed(2) + " km/h": "-"}
+                heading={valid? this.state.snapshot.markers[targetId].heading.toFixed(1) + "°": "-"}
+                handleStopButtonClick={this.handleStopButtonClick}
+              />) : null }
+        <List dense style={{position: "relative", overflow:"auto", backgroundColor: "white", padding: "0px"}}>
+          <MessageMenuHeader refresh={this.refresh} />
+          { Object.keys(this.state.snapshot.markers).length > 0 
+              ? Object.keys(this.state.snapshot.markers).map(key => ( 
+                <MessageItem 
+                  key={key} 
+                  id={key}
+                  selected={key === this.state.selected}
+                  worldView={this.state.snapshot.mapMode.worldView} 
+                  itemClick={this.handleItemClick}
+                  buttonClick={this.handleButtonClick}
+                  msgType={this.state.snapshot.markers[key].msgType} 
+                  topic={this.state.snapshot.markers[key].topic} />))
+              : <EmptyItem /> }
+        </List>
+      </Drawer>: null)
+  }
 }
+MessageMenu.contextType = SettingContext;
+export default withStyles(styles)(MessageMenu);

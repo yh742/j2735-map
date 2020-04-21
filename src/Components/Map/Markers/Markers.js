@@ -1,13 +1,13 @@
 import React, { useContext } from 'react'
-import {SettingContext} from '../../Store'
+import {SettingContext } from '../../Store'
 import Marker from './Marker/Marker'
 
+
 export default function Markers(props) {
-    const [state] = useContext(SettingContext);
+    const [ state ] = useContext(SettingContext);
     const { inViewPort } = props;
     // only render markers that are in viewport 
-    const inViewMarkers = Object.keys(state.markers)
-        .filter(key => inViewPort(state.markers[key].long, state.markers[key].lat))
+    const inViewMarkers = Object.keys(state.markers).filter(key => inViewPort(state.markers[key].long, state.markers[key].lat))
     // translation animations have to be done with marker and rotation animations with images
     return (
         <>

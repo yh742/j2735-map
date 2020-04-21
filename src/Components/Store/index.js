@@ -11,6 +11,7 @@ export const SettingActions = {
     restoreState: "RESTORE_STATE",
     clearHistory: "CLEAR_HISTORY",
     updateMarker: "UPDATE_MARKER",
+    incrementNotification: "INC_NOTIFICATION",
     setNotification: "SET_NOTIFICATION",
     setAnimation: "SET_ANIMATION",
     setMapMode: "SET_MAP_MODE",
@@ -94,10 +95,25 @@ const reducer = (state, action) => {
                 ...state,
                 history: []
             }
+        case SettingActions.incrementNotification:
+            if (state.notification.listen){ 
+                return {
+                    ...state,
+                    notification: {
+                        ...state.notification,
+                        newMessages: state.notification.newMessages + action.payload,
+                    }
+                }
+            } else {
+                return {
+                    ...state
+                }
+            }
         case SettingActions.setNotification:
             return {
                 ...state,
                 notification: {
+                    ...state.notification,
                     ...action.payload
                 }
             }
@@ -110,49 +126,41 @@ const reducer = (state, action) => {
                 }
             }
         case SettingActions.updateMarker:
-            let count = 0;
-            if (state.notification.listen){
-                count = Object.keys(action.payload).filter(key=> !(key in state.markers)).length;
-            }
-            let temp = {};
+            // if (!state.mapMode.worldView && state.mapMode.targetId in state.markers) {
+            //     return {
+            //         ...state,
+            //         mapView: {
+            //             ...state.mapView,
+            //             latitude: state.markers[state.mapMode.targetId].lat,
+            //             longitude: state.markers[state.mapMode.targetId].long,
+            //             zoom: 19.5,
+            //             transitionDuration: window.production.animate,
+            //             //bearing: state.markers[state.mapMode.targetId].heading,
+            //             pitch: 0
+            //         },
+            //         notification: {
+            //             ...state.notification,
+            //             newMessages: state.notification.newMessages + count,
+            //         },
+            //         markers: {
+            //             ...temp,
+            //             ...action.payload
+            //         }
+            //     }
+            // }
+            let updatedTTL = {};
             for (const key in state.markers) {
                 if (state.markers[key].ttl - 1 !== 0) {
-                    temp[key] = {
+                    updatedTTL[key] = {
                         ...state.markers[key],
                         ttl: state.markers[key].ttl - 1,
                     }
                 }   
             }
-            if (!state.mapMode.worldView && state.mapMode.targetId in state.markers) {
-                return {
-                    ...state,
-                    mapView: {
-                        ...state.mapView,
-                        latitude: state.markers[state.mapMode.targetId].lat,
-                        longitude: state.markers[state.mapMode.targetId].long,
-                        zoom: 19.5,
-                        transitionDuration: window.production.animate,
-                        //bearing: state.markers[state.mapMode.targetId].heading,
-                        pitch: 0
-                    },
-                    notification: {
-                        ...state.notification,
-                        newMessages: state.notification.newMessages + count,
-                    },
-                    markers: {
-                        ...temp,
-                        ...action.payload
-                    }
-                }
-            }
             return {
                 ...state,
-                notification: {
-                    ...state.notification,
-                    newMessages: state.notification.newMessages + count,
-                },
                 markers: {
-                    ...temp,
+                    ...updatedTTL,
                     ...action.payload
                 }
             }
