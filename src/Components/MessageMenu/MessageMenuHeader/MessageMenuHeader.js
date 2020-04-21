@@ -13,6 +13,7 @@ const useStyles = makeStyles((theme) => ({
     header: {
         paddingLeft: theme.spacing(3),
         display: "block",
+        lineHeight: "3.5rem",
     },
     trackButton: {
         fontSize: '9px',
@@ -33,7 +34,7 @@ export default React.memo(({ refresh }) => {
                 variant="outlined" 
                 size="small" 
                 color="primary" 
-                className={classes.trackButton}>Refresh</Button>        <Divider /></ListSubheader>
+                className={classes.trackButton}>Refresh</Button><Divider /></ListSubheader>
 
         </>)
 });

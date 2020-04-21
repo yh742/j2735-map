@@ -120,6 +120,7 @@ class Map extends Component {
   render() {
     const {classes} = this.props;
     const [ state ] = this.context;
+    //return null;
     return (
       <ReactMapGL
         ref={this.mapRef}

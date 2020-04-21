@@ -20,29 +20,40 @@ const useStyles = makeStyles((theme) => ({
         paddingLeft: "8px",
         paddingRight: "8px",
     },
+    vzColor: {
+        color: theme.palette.secondary.main,
+        // fontWeight: 800,
+    }
 }));
 
-const maxStringLength = 13;
+const maxStringLength = 12;
 
 const truncateLabel = (topic) => {
-    return topic.length <= 13? topic: topic.substring(0, maxStringLength) + "..." 
+    let cleanTopic = topic.toUpperCase().replace("VZCV2X/1/IN/", "");
+    return cleanTopic.length <= maxStringLength? cleanTopic: cleanTopic.substring(0, maxStringLength) + ".." 
 }
 
 export default React.memo(({ id, worldView, itemClick, buttonClick, msgType, topic, selected }) => {
     const classes = useStyles();
+    const truncatedTopic = truncateLabel(topic);
+    const color =  truncatedTopic.startsWith("VEH")? classes.vzColor: null;
     return (
         <ListItem button={worldView} onClick={()=> {if (worldView) itemClick(id)}} selected={selected}>
-            <ListItemIcon className={classes.listIcon}>
+            <ListItemIcon classes={{root: color}} className={classes.listIcon}>
             {msgType === "BSM"? <LocalTaxiIcon />: <AccessibilityIcon />}
             </ListItemIcon>
             <ListItemText
                 primary={id} 
-                secondary={truncateLabel(topic)} />
+                classes={{
+                    primary: color,
+                    secondary: color,
+                }}
+                secondary={truncatedTopic} />
             {worldView? (<Button 
                 onClick={(evt)=>buttonClick(evt, id)} 
                 variant="outlined" 
                 size="small" 
-                color="primary" 
+                color={truncatedTopic.startsWith("VEH")? "secondary": "primary"} 
                 className={classes.trackButton}>Track</Button>): null}
         </ListItem>)
 });
