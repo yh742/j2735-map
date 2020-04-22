@@ -3,9 +3,10 @@ import { SettingContext, SettingActions} from '../Store'
 import Markers from './Markers/Markers'
 import { Component } from "react";
 import { withStyles } from '@material-ui/core'
-import BufferedMQTTClient from '../Helper/BufferedMqttClient';
+import BufferedMessageClient from '../Helper/BufferedMessageClient';
 
 import RoadLabels from './Assets/Layers/RoadLabels'
+import SpatLayers from './SpatLayers/SpatLayers'
 
 
 import Geocoder from 'react-map-gl-geocoder'
@@ -90,18 +91,24 @@ class Map extends Component {
 
   componentDidMount() {
     const [ state, dispatch ] = this.context;
-    this.client = new BufferedMQTTClient(
-      () => {
+    this.client = new BufferedMessageClient(() => {
           dispatch((msg) => ({
               type: SettingActions.addError,
               payload: msg,
           }))
-      },
-      (buffer) => {
+      }, (buffer, spatBuffer) => {
           dispatch({
               type: SettingActions.updateMarker,
               payload: buffer,
           });
+          dispatch({
+              type: SettingActions.updateSPAT,
+              payload: spatBuffer.messages,
+          });
+          dispatch({
+            type: SettingActions.updateSignals,
+            payload: spatBuffer.lights,
+        });
           let count = 0;
           count = Object.keys(buffer).filter(key=> !(key in state.markers)).length;
           dispatch({
@@ -120,7 +127,6 @@ class Map extends Component {
   render() {
     const {classes} = this.props;
     const [ state ] = this.context;
-    //return null;
     return (
       <ReactMapGL
         ref={this.mapRef}
@@ -149,10 +155,11 @@ class Map extends Component {
         <div className={classes.navControl}>
           <NavigationControl />
         </div></>) : null }
+        <SpatLayers reds={state.signals.reds} greens={state.signals.greens} yellows={state.signals.yellows} />
         <Layer {...RoadLabels} layout={{...RoadLabels.layout, "visibility": state.stNames? "visible": "none"}}/>
           { state.mapView.zoom > 16.5 && this.mapRef.current? 
-          <Markers 
-            inViewPort={(long, lat) => this.mapRef.current.getMap().getBounds().contains([long, lat])} />: null }
+            <Markers 
+              inViewPort={(long, lat) => this.mapRef.current.getMap().getBounds().contains([long, lat])} />: null }
       </ReactMapGL>
     );
   }

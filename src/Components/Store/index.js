@@ -18,6 +18,8 @@ export const SettingActions = {
     addError: "ADD_ERROR",
     removeError: "REMOVE_ERROR",
     processError: "PROCESS_ERROR",
+    updateSPAT: "UPDATE_SPAT",
+    updateSignals: "UPDATE_SIGNAL",
 }
 
 const schema = {
@@ -66,6 +68,12 @@ const initialState = {
     error: {
         message: "",
         queue: [],
+    },
+    spat: {},
+    signals: {
+        greens:[],
+        reds:[],
+        yellows:[]
     },
 };
 
@@ -125,29 +133,24 @@ const reducer = (state, action) => {
                     ...action.payload,
                 }
             }
+        case SettingActions.updateSPAT:
+            return {
+                ...state,
+                spat: {
+                    ...state.spat,
+                    ...action.payload,
+                }
+            }
+        case SettingActions.updateSignals:
+            return {
+                ...state,
+                signals: {
+                    ...state.signals,
+                    ...action.payload
+                }
+            }
         case SettingActions.updateMarker:
-            // if (!state.mapMode.worldView && state.mapMode.targetId in state.markers) {
-            //     return {
-            //         ...state,
-            //         mapView: {
-            //             ...state.mapView,
-            //             latitude: state.markers[state.mapMode.targetId].lat,
-            //             longitude: state.markers[state.mapMode.targetId].long,
-            //             zoom: 19.5,
-            //             transitionDuration: window.production.animate,
-            //             //bearing: state.markers[state.mapMode.targetId].heading,
-            //             pitch: 0
-            //         },
-            //         notification: {
-            //             ...state.notification,
-            //             newMessages: state.notification.newMessages + count,
-            //         },
-            //         markers: {
-            //             ...temp,
-            //             ...action.payload
-            //         }
-            //     }
-            // }
+            // decrement TTL on old markers
             let updatedTTL = {};
             for (const key in state.markers) {
                 if (state.markers[key].ttl - 1 !== 0) {
@@ -195,6 +198,12 @@ const reducer = (state, action) => {
                         error: {
                             message: "",
                             queue: [],
+                        },
+                        spat: {},
+                        signals: {
+                            greens:[],
+                            reds:[],
+                            yellows:[]
                         },
                     }
                 } else {

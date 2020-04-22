@@ -3,7 +3,7 @@ export const GreenSignal = {
     "type": "symbol",
     "metadata": {"mapbox:group": "78bc5266126203977554590806fdcf17"},
     "source": "composite",
-    "source-layer": "state-main-0n4jew",
+    "source-layer": "state-main-1ua3zd",
     "minzoom": 18,
     "filter": ["any"],
     "layout": {
@@ -39,7 +39,7 @@ export const YellowSignal = {
     "type": "symbol",
     "metadata": {"mapbox:group": "78bc5266126203977554590806fdcf17"},
     "source": "composite",
-    "source-layer": "state-main-0n4jew",
+    "source-layer": "state-main-1ua3zd",
     "minzoom": 18,
     "filter": ["any"],
     "layout": {
@@ -75,7 +75,7 @@ export const RedSignal = {
     "type": "symbol",
     "metadata": {"mapbox:group": "78bc5266126203977554590806fdcf17"},
     "source": "composite",
-    "source-layer": "state-main-0n4jew",
+    "source-layer": "state-main-1ua3zd",
     "minzoom": 18,
     "filter": ["any"],
     "layout": {
