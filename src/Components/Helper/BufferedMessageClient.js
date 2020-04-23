@@ -1,14 +1,11 @@
 import mqtt from 'mqtt';
 import { ParseLocation, ParseHeading, ParseSpeed } from './Conversion';
 
-
 export default class BufferedMessageClient {
-    constructor(errorCallback, timerCallback, timerInterval = window.production.animate) {
-        this.localBuffer = {};
-        this.spatBuffer = {
-            lights: {},
-            messages: {},
-        };
+    constructor(dispatchers, timerInterval=window.production.animate) {
+        this.msgBuffer = {};
+        this.spatLightsBuffer = {};
+        this.spatMessagesBuffer = {};
         this.client = mqtt.connect(window.production.server, {
             port: window.production.port,
             host: window.production.server,
@@ -17,20 +14,28 @@ export default class BufferedMessageClient {
             console.log("connected to mqtt", this.client);
             this.client.subscribe(window.production.topic, (err) => {
                 if (err) {
-                    console.log("couldn't subscribe to mqtt server")
-                    errorCallback("Couldn't subscribe to MQTT server!")
+                    console.log("couldn't subscribe to mqtt server");
+                    dispatchers.addError("Couldn't subscribe to MQTT server!");
                     return;
                 }
                 this.client.on("message", this.handleMqttMessages);
             });
         });
-        this.interval = setInterval(() => timerCallback(this.localBuffer, this.spatBuffer), timerInterval);
+        this.interval = setInterval(() => this.intervalJob(dispatchers), timerInterval);
+    }
+
+    intervalJob(dispatchers) {
+        dispatchers.updateMarker(this.msgBuffer);
+        dispatchers.updateSPAT(this.spatMessagesBuffer);
+        dispatchers.updateSignals(this.spatLightsBuffer);
+        dispatchers.updateNotification(Object.keys(this.msgBuffer));
+        this.clearBuffer()
     }
 
     clearBuffer() {
-        this.localBuffer = {};
-        this.spatBuffer.lights = {};
-        this.spatBuffer.messages = {};
+        this.msgBuffer = {};
+        this.spatLightsBuffer = {};
+        this.spatMessagesBuffer = {};
     }
 
     disconnect() {
@@ -66,9 +71,9 @@ export default class BufferedMessageClient {
           );
         } else if ("SPAT" in jsonObj.MessageFrame.value) {
             this.convertSpatMessages(
-                jsonObj.MessageFrame.value.SPAT.intersections.IntersectionState.id.id,
+                // jsonObj.MessageFrame.value.SPAT.intersections.IntersectionState.id.id,
                 jsonObj.MessageFrame.value.SPAT.intersections.IntersectionState.states.MovementState,
-                jsonObj.MessageFrame.source? jsonObj.MessageFrame.source: null,
+                // jsonObj.MessageFrame.source? jsonObj.MessageFrame.source: null,
             )
         }
     }
@@ -86,17 +91,19 @@ export default class BufferedMessageClient {
             case "protected-clearance":
             case "caution-conflicting-traffic":
                 return "yellow";
+            default:
+                return "";
         }
     }
 
-    convertSpatMessages = (id, movementStates, topic) => {
+    convertSpatMessages = (movementStates) => {
         let pubObj = {};
         let greens = [];
         let yellows =[];
         let reds = []; 
         movementStates.forEach((mState) => {
             const { 
-                "signalGroup": signalGroup, 
+                signalGroup, 
                 "state-time-speed": {
                   "MovementEvent": {
                     "eventState": state
@@ -115,6 +122,8 @@ export default class BufferedMessageClient {
                 case "green":
                     greens.push(sg);
                     break
+                default:
+                    break;
             }
             pubObj[signalGroup] = {
                 status: Object.keys(state)[0],
@@ -122,11 +131,11 @@ export default class BufferedMessageClient {
                 minEndTime: mState["state-time-speed"].MovementEvent.timing? mState["state-time-speed"].MovementEvent.timing.minEndTime/10: -1,
             };
         }); 
-        this.spatBuffer.messages = {
-            ...this.spatBuffer.messages,
+        this.spatMessagesBuffer = {
+            ...this.spatMessagesBuffer,
             ...pubObj,
         };
-        this.spatBuffer.lights = {
+        this.spatLightsBuffer = {
             greens: greens,
             yellows: yellows,
             reds: reds,
@@ -135,8 +144,8 @@ export default class BufferedMessageClient {
 
     convertMessages = (msgObj, topic, msgType) => {
         const { heading, id, long, lat, speed } = msgObj;
-        this.localBuffer = {
-            ...this.localBuffer,
+        this.msgBuffer = {
+            ...this.msgBuffer,
             [id]: {
                 topic: topic,
                 msgType: msgType,

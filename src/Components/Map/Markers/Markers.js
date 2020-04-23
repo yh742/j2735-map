@@ -1,36 +1,48 @@
-import React, { useContext } from 'react'
-import {SettingContext } from '../../Store'
-import Marker from './Marker/Marker'
+import React from 'react'
+import { connect } from 'react-redux';
+import { withStyles } from '@material-ui/core';
 
+import Marker from './Marker/Marker';
+import styles from './Style/styles';
 
-export default function Markers(props) {
-    const [ state ] = useContext(SettingContext);
-    const { inViewPort } = props;
+const Markers = ({ inViewPort, markers, targetedMarker, popupEnabled, animateIcons, zoom, bearing }) => {
     // only render markers that are in viewport 
-    const inViewMarkers = Object.keys(state.markers).filter(key => inViewPort(state.markers[key].long, state.markers[key].lat))
-    // translation animations have to be done with marker and rotation animations with images
+    const inViewMarkers = Object.keys(markers).filter(key => inViewPort(markers[key].long, markers[key].lat))
     return (
         <>
         { inViewMarkers.length > 0? inViewMarkers.map(key => {
-            let obj = state.markers[key];
+            let obj = markers[key];
             let lat = Math.floor(obj.lat * 1e5) / 1e5;
             let long = Math.floor(obj.long * 1e5) / 1e5;
             let speed = Math.floor(obj.speed);
             return (
                 <div key={key}>
                 <Marker
-                    highlight={key === state.mapMode.targetId? true: false}
-                    popup={state.vehPopup}
-                    animateIcon={state.animateIcons} 
+                    highlight={key === targetedMarker? true: false}
+                    popup={popupEnabled}
+                    animateIcons={animateIcons} 
                     lat={lat} 
                     long={long}
                     msgType={obj.msgType} 
                     heading={obj.heading} 
-                    zoom={state.mapView.zoom}
+                    zoom={zoom}
                     speed={speed}
-                    mapBearing={state.mapView.bearing} />
+                    mapBearing={bearing} />
                 </div>
             )}): null }
         </>
     );
 }
+
+const mapStateToProps = state => {
+    return {
+        markers: state.markers, 
+        targetedMarker: state.mapMode.targetId,
+        popupEnabled: state.displaySettings.vehPopup,
+        animateIcons: state.animateIcons,
+        zoom: state.mapView.zoom,
+        bearing: state.mapView.bearing
+    };
+}
+
+export default connect(mapStateToProps, null)(withStyles(styles)(Markers));
