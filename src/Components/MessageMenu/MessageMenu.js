@@ -27,7 +27,6 @@ class MessageMenu extends Component {
   }
 
   handleItemClick = (key) => {
-    this.props.pauseAnimation(this.props.animationIcons, 300);
     // check if key still exists in current markers
     if (!(key in this.props.markers)) {
       this.setState({ selected: null });
@@ -43,6 +42,7 @@ class MessageMenu extends Component {
       // (2) set the map to the location of the marker
       // (3) set map to target marker ID
       this.setState({ selected: key });
+      this.props.pauseAnimation(this.props.animationIcons, 300);
       this.props.setMapCenter(this.props.markers[key].long, this.props.markers[key].lat);
       this.props.setMapMode(key, true);
     }

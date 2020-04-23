@@ -18,24 +18,22 @@ const truncateLabel = (topic) => {
 
 const MessageItem = ({ classes, id, itemClick, msgType, topic, selected }) => {
     const truncatedTopic = truncateLabel(topic);
-    const color =  truncatedTopic.startsWith("VEH")? classes.vzColor: null;
     return (
         <ListItem 
             button 
             onClick={()=> itemClick(id)} 
             selected={selected}>
-            <ListItemIcon classes={{root: color}} className={classes.listIcon}>
+            <ListItemIcon className={classes.listIcon}>
                 {msgType === "BSM"? <LocalTaxiIcon />: <AccessibilityIcon />}
             </ListItemIcon>
             <ListItemText
                 primary={id} 
-                classes={{ primary: color,secondary: color }}
                 secondary={truncatedTopic} />
             <Button 
                 variant="outlined" 
                 size="small" 
                 color={truncatedTopic.startsWith("VEH")? "secondary": "primary"} 
-                className={classes.trackButton}>Track</Button>
+                className={classes.trackButton}>{truncatedTopic.startsWith("VEH")? "MODE": "TRACK"}</Button>
         </ListItem>)
 };
 
