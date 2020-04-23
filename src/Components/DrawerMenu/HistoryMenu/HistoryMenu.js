@@ -11,7 +11,7 @@ import HistoryIcon from '@material-ui/icons/History';
 import DeleteSweepIcon from '@material-ui/icons/DeleteSweep';
 
 import styles from '../Style/styles';
-import * as actionCreators from '../../store/actions/actions';
+import * as actionCreators from '../../../store/actions/actions';
 
 const MAX_STRING_LENGTH = 21;
 
@@ -50,7 +50,7 @@ const mapStateToProps = state => {
   
 const mapDispatchToProps = dispatch => {
     return {
-        handleHistoryClick: (item) => dispatch(actionCreators.setMapCenter(item.center[0], item.center[1])),
+        handleHistoryClick: (item) => dispatch(actionCreators.setMapView({longitude: item.center[0], latitude: item.center[1], zoom: 16})),
         handleClearHistory: () => dispatch(actionCreators.handleClearHistory()),
     };
 };

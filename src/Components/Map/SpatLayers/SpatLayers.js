@@ -2,7 +2,7 @@ import React from 'react';
 import { Layer } from "react-map-gl";
 import { connect } from 'react-redux';
 
-import Compare from '../../Helper/Compare';
+import { Compare } from '../../Helper/Utility'
 import { GreenSignal, YellowSignal, RedSignal } from '../Assets/Layers/LaneSignals';
 import { GreenTrajectory, YellowTrajectory} from '../Assets/Layers/LaneTrajectories';
 

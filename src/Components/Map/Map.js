@@ -9,7 +9,7 @@ import Markers from './Markers/Markers'
 import RoadLabels from './Assets/Layers/RoadLabels'
 import SpatLayers from './SpatLayers/SpatLayers'
 import BufferedMessageClient from '../Helper/BufferedMessageClient';
-import * as actionCreators from '../store/actions/actions';
+import * as actionCreators from '../../store/actions/actions';
 
 const MAPBOX_TOKEN = window.production.mbToken;
 const MAPBOX_STYLE = window.production.mbStyle;

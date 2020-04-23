@@ -6,7 +6,7 @@ import { withStyles } from '@material-ui/core';
 import styles from '../Style/styles';
 import CarIcon from '../../Assets/Images/car.png';
 import PedIcon from '../../Assets/Images/ped.png';
-import {Rotate, ScaleMarker} from '../../../Helper/Conversion';
+import {Rotate, ScaleMarker} from '../../../Helper/Utility';
 
 const CustomMarker = React.memo(({ classes, highlight, popup, animateIcons, lat, long, msgType, heading, speed, zoom, mapBearing }) => {
     return (

@@ -9,8 +9,8 @@ import styles from './Style/styles';
 import EmptyItem from './EmptyItem/EmptyItem';
 import MessageItem from './MessagetItem/MessageItem';
 import MessageMenuHeader from './MessageMenuHeader/MessageMenuHeader';
-import * as actionCreators from '../store/actions/actions';
-
+import * as actionCreators from '../../store/actions/actions';
+import { DecodeTopicType } from '../Helper/Utility';
 
 class MessageMenu extends Component {
   
@@ -43,7 +43,11 @@ class MessageMenu extends Component {
       // (3) set map to target marker ID
       this.setState({ selected: key });
       this.props.pauseAnimation(this.props.animationIcons, 300);
-      this.props.setMapCenter(this.props.markers[key].long, this.props.markers[key].lat);
+      this.props.setMapView({
+        longitude: this.props.markers[key].long, 
+        latitude: this.props.markers[key].lat,
+        zoom: 19
+      });
       this.props.setMapMode(key, true);
     }
   }
@@ -73,7 +77,7 @@ class MessageMenu extends Component {
                   selected={key === this.state.selected}
                   itemClick={() => this.handleItemClick(key)}
                   msgType={markers[key].msgType} 
-                  topic={markers[key].topic} />))
+                  source={DecodeTopicType(markers[key].topic)} />))
               : <EmptyItem /> }
         </List>
       </Drawer>
@@ -92,7 +96,7 @@ const mapDispatchToProps = dispatch => {
   return {
       pauseAnimation: (onNow, time) => dispatch(actionCreators.pauseAnimation(onNow, time)),
       addError: (msg) => dispatch(actionCreators.addError(msg)),
-      setMapCenter: (long, lat) => dispatch(actionCreators.setMapCenter(long, lat)),
+      setMapView: (view) => dispatch(actionCreators.setMapView(view)),
       setMapMode: (target, mapView) => dispatch(actionCreators.setMapMode(target, mapView))
   }
 };

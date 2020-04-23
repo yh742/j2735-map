@@ -9,31 +9,23 @@ import AccessibilityIcon from '@material-ui/icons/Accessibility';
 
 import styles from '../Style/styles';
 
-const maxStringLength = 12;
-
-const truncateLabel = (topic) => {
-    let cleanTopic = topic.toUpperCase().replace("VZCV2X/1/IN/", "");
-    return cleanTopic.length <= maxStringLength? cleanTopic: cleanTopic.substring(0, maxStringLength) + ".." 
-}
-
-const MessageItem = ({ classes, id, itemClick, msgType, topic, selected }) => {
-    const truncatedTopic = truncateLabel(topic);
+const MessageItem = ({ classes, id, itemClick, msgType, selected, source }) => {
     return (
         <ListItem 
             button 
-            onClick={()=> itemClick(id)} 
-            selected={selected}>
+            selected={selected}
+            onClick={()=> itemClick(id)} >
             <ListItemIcon className={classes.listIcon}>
                 {msgType === "BSM"? <LocalTaxiIcon />: <AccessibilityIcon />}
             </ListItemIcon>
             <ListItemText
                 primary={id} 
-                secondary={truncatedTopic} />
+                secondary={source} />
             <Button 
                 variant="outlined" 
                 size="small" 
-                color={truncatedTopic.startsWith("VEH")? "secondary": "primary"} 
-                className={classes.trackButton}>{truncatedTopic.startsWith("VEH")? "MODE": "TRACK"}</Button>
+                color={source === "Vehicle" ? "secondary": "primary"} 
+                className={classes.trackButton}>{source === "Vehicle"? "MODE": "TRACK"}</Button>
         </ListItem>)
 };
 

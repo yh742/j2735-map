@@ -1,5 +1,5 @@
 import mqtt from 'mqtt';
-import { ParseLocation, ParseHeading, ParseSpeed } from './Conversion';
+import { ParseLocation, ParseHeading, ParseSpeed } from './Utility';
 
 export default class BufferedMessageClient {
     constructor(dispatchers, timerInterval=window.production.animate) {
@@ -71,9 +71,7 @@ export default class BufferedMessageClient {
           );
         } else if ("SPAT" in jsonObj.MessageFrame.value) {
             this.convertSpatMessages(
-                // jsonObj.MessageFrame.value.SPAT.intersections.IntersectionState.id.id,
                 jsonObj.MessageFrame.value.SPAT.intersections.IntersectionState.states.MovementState,
-                // jsonObj.MessageFrame.source? jsonObj.MessageFrame.source: null,
             )
         }
     }

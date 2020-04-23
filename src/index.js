@@ -8,9 +8,9 @@ import { createStore, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 import thunk from 'redux-thunk';
 
-import App from './Components/App/App';
+import App from './App';
 import theme from './theme/theme';
-import reducer from './Components/store/reducers/reducers';
+import reducer from './store/reducers/reducers';
 
 const RouteAwareApp = withRouter(App);
 const store = createStore(reducer, applyMiddleware(thunk));

@@ -6,15 +6,15 @@ import './css/mapbox/mapbox-gl-geocoder.css';
 import { withStyles } from '@material-ui/core';
 import { Route, Switch, Redirect } from 'react-router-dom';
 
-import Map from '../Map/Map';
-import Settings from '../SettingMenu/SettingMenu';
-import Header from '../Header/Header';
-import DrawerMenu from '../DrawerMenu/DrawerMenu';
-import MessageMenu from '../MessageMenu/MessageMenu';
-import ErrorNotification from '../ErrorNotification/ErrorNotification';
-import styles from './Style/styles';
-import ValidateSettings from './Schema';
-import * as actionCreators from '../store/actions/actions';
+import Map from './Components/Map/Map';
+import Settings from './Components/SettingMenu/SettingMenu';
+import Header from './Components/Header/Header';
+import DrawerMenu from './Components/DrawerMenu/DrawerMenu';
+import MessageMenu from './Components/MessageMenu/MessageMenu';
+import ErrorNotification from './Components/ErrorNotification/ErrorNotification';
+import styles from './styles';
+import ValidateSettings from './store/schema';
+import * as actionCreators from './store/actions/actions';
 
 class App extends Component {
 

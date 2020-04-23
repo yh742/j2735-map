@@ -59,17 +59,6 @@ export const setMapView = (view) => {
     };
 }
 
-export const setMapCenter = (long, lat) => {
-    return {
-        type: actionTypes.SET_MAPVIEW,
-        payload: {
-            longitude: long,
-            latitude: lat,
-            transitionDuration: 0
-        }
-    };
-};
-
 export const setMapMode = (target, worldView) => {
     return {
         type: actionTypes.SET_MAPMODE,
