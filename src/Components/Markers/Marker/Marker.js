@@ -3,10 +3,10 @@ import clsx from 'clsx';
 import { Marker } from 'react-map-gl';
 import { withStyles } from '@material-ui/core';
 
-import styles from '../Style/styles';
-import CarIcon from '../../Assets/Images/car.png';
-import PedIcon from '../../Assets/Images/ped.png';
-import {Rotate, ScaleMarker} from '../../../Helper/Utility';
+import styles from '../style/styles';
+import CarIcon from '../Assets/Images/car.png';
+import PedIcon from '../Assets/Images/ped.png';
+import {Rotate, ScaleMarker} from '../../Helper/Utility';
 
 const CustomMarker = React.memo(({ classes, highlight, popup, animateIcons, lat, long, msgType, heading, speed, zoom, mapBearing }) => {
     return (

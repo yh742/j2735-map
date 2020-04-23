@@ -1,5 +1,6 @@
 export function ParseLocation(position) {
-    return parseFloat(position) / 10e6;
+    let loc = parseFloat(position) / 10e6;
+    return Math.floor(loc * 1e5) / 1e5
 }
 
 export function ParseHeading(heading) {

@@ -55,7 +55,16 @@ const styles = (theme) => ({
   },
   highlightedEntry: {
       color: theme.palette.secondary.main,
-  }
+  },
+  listStartEntry: {
+    [theme.breakpoints.up('sm')]: {
+      paddingLeft: theme.spacing(1),
+    },
+  },
+  wordWrap: { 
+      wordWrap: "break-word", 
+      whiteSpace: "normal" 
+  },
 });
 
 export default styles;

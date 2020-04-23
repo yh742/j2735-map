@@ -7,26 +7,28 @@ import ListItemText from '@material-ui/core/ListItemText';
 import LocalTaxiIcon from '@material-ui/icons/LocalTaxi';
 import AccessibilityIcon from '@material-ui/icons/Accessibility';
 
-import styles from '../Style/styles';
+import styles from '../style/styles';
 
-const MessageItem = ({ classes, id, itemClick, msgType, selected, source }) => {
+const MessageItem = React.memo(({ classes, id, disable, itemClick, buttonClick, msgType, selected, source }) => {
     return (
         <ListItem 
             button 
             selected={selected}
-            onClick={()=> itemClick(id)} >
+            onClick={() => { if(!disable) itemClick(id) }} >
             <ListItemIcon className={classes.listIcon}>
                 {msgType === "BSM"? <LocalTaxiIcon />: <AccessibilityIcon />}
             </ListItemIcon>
             <ListItemText
                 primary={id} 
                 secondary={source} />
+            { !disable?
             <Button 
+                size="small"
                 variant="outlined" 
-                size="small" 
+                onClick={buttonClick} 
                 color={source === "Vehicle" ? "secondary": "primary"} 
-                className={classes.trackButton}>{source === "Vehicle"? "MODE": "TRACK"}</Button>
+                className={classes.trackButton}>{source === "Vehicle"? "MODE": "TRACK"}</Button>: null}
         </ListItem>)
-};
+});
 
 export default withStyles(styles)(MessageItem);

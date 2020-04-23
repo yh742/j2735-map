@@ -12,7 +12,7 @@ import Header from './Components/Header/Header';
 import DrawerMenu from './Components/DrawerMenu/DrawerMenu';
 import MessageMenu from './Components/MessageMenu/MessageMenu';
 import ErrorNotification from './Components/ErrorNotification/ErrorNotification';
-import styles from './styles';
+import styles from './style/styles';
 import ValidateSettings from './store/schema';
 import * as actionCreators from './store/actions/actions';
 

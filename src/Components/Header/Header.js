@@ -5,7 +5,7 @@ import InfoIcon from '@material-ui/icons/Info';
 import { withStyles } from '@material-ui/core/styles'
 import { AppBar, Toolbar, IconButton, Badge } from '@material-ui/core';
 
-import styles from './Style/styles';
+import styles from './style/styles';
 import { ReactComponent as Logo } from "./Assets/logo.svg";
 
 const Header = ({ classes, onClick, showMenu, onAssessmentClick, badgeCount }) => {

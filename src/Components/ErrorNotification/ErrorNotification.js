@@ -6,7 +6,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import Snackbar from '@material-ui/core/Snackbar';
 import ErrorIcon from '@material-ui/icons/Error';
 
-import styles from './Style/styles';
+import styles from './style/styles';
 import * as actionCreators from '../../store/actions/actions';
 
 const ErrorNotification = ({ classes, handleClose, handleExit, errorMessage }) => {

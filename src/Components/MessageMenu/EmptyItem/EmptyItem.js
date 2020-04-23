@@ -3,7 +3,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import { withStyles } from '@material-ui/core'
 
-import styles from '../Style/styles';
+import styles from '../style/styles';
 
 const EmptyItem = ({classes}) => {
     return (

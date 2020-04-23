@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { withStyles } from '@material-ui/core';
 
 import Marker from './Marker/Marker';
-import styles from './Style/styles';
+import styles from './style/styles';
 
 const Markers = ({ inViewPort, markers, targetedMarker, popupEnabled, animateIcons, zoom, bearing }) => {
     // only render markers that are in viewport 

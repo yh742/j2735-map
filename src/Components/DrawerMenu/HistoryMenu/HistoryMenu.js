@@ -10,7 +10,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import HistoryIcon from '@material-ui/icons/History';
 import DeleteSweepIcon from '@material-ui/icons/DeleteSweep';
 
-import styles from '../Style/styles';
+import styles from '../style/styles';
 import * as actionCreators from '../../../store/actions/actions';
 
 const MAX_STRING_LENGTH = 21;
@@ -19,12 +19,26 @@ const truncateString = (text) => {
     return text.length <= MAX_STRING_LENGTH? text: text.substring(0, MAX_STRING_LENGTH) + "..." ;
 }
 
-const HistoryMenu = ({classes, historyList, handleHistoryClick, handleClearHistory}) => {
+const HistoryMenu = ({classes, historyList, addError, tracking, handleHistoryClick, handleClearHistory}) => {
+    
+    const handleClick = (item) => {
+        if (tracking) {
+            addError("Can't use this feature in tracking mode!");
+            return;
+        }
+        handleHistoryClick({
+            longitude: item.center[0], 
+            transitionDuration: 0,
+            latitude: item.center[1], 
+            zoom: 16
+        });
+    }
+
     return (
         <List>
             <ListSubheader inset>Search History</ListSubheader>
             { historyList.map((item) => (
-                <ListItem key={item.id} button component={Link} to="/" onClick={() => handleHistoryClick(item)}>
+                <ListItem key={item.id} button component={Link} to="/" onClick={() => handleClick(item)}>
                     <ListItemIcon className={classes.listIcon} >
                         <HistoryIcon />
                     </ListItemIcon>
@@ -45,12 +59,14 @@ const HistoryMenu = ({classes, historyList, handleHistoryClick, handleClearHisto
 const mapStateToProps = state => {
     return {
         historyList: state.history,
+        tracking: state.mapMode.tracking
     };
 }
   
 const mapDispatchToProps = dispatch => {
     return {
-        handleHistoryClick: (item) => dispatch(actionCreators.setMapView({longitude: item.center[0], latitude: item.center[1], zoom: 16})),
+        addError: (msg) => dispatch(actionCreators.addError(msg)),
+        handleHistoryClick: (view) => dispatch(actionCreators.setMapView(view)),
         handleClearHistory: () => dispatch(actionCreators.handleClearHistory()),
     };
 };

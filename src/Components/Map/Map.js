@@ -4,8 +4,8 @@ import { withStyles } from '@material-ui/core';
 import Geocoder from 'react-map-gl-geocoder';
 import ReactMapGL, { Layer, NavigationControl, LinearInterpolator } from 'react-map-gl';
 
-import styles from './Style/styles';
-import Markers from './Markers/Markers'
+import styles from './style/styles';
+import Markers from '../Markers/Markers'
 import RoadLabels from './Assets/Layers/RoadLabels'
 import SpatLayers from './SpatLayers/SpatLayers'
 import BufferedMessageClient from '../Helper/BufferedMessageClient';
@@ -48,7 +48,8 @@ class Map extends Component {
   }
 
   // remove animation transition when user is interacting
-  handleInteractions = (iState) => {
+  handleInteractions = (iState, tracking) => {
+    if (tracking) return;
     if ((iState.isDragging || iState.isPanning || iState.isRotating || iState.isZooming) && 
       this.props.animateIcons === true) {
         this.props.setAnimation(false);
@@ -72,13 +73,19 @@ class Map extends Component {
   }
 
   render() {
-    const {classes, mapView, displayStreets} = this.props;
+    const {classes, mapView, displayStreets, tracking} = this.props;
+    // return null;
     return (
       <ReactMapGL
         ref={this.mapRef}
         {...mapView}
         onResize={this.handleMapResize}
-        onInteractionStateChange={this.handleInteractions}
+        dragPan={!tracking}
+        dragRotate={!tracking}
+        doubleClickZoom={!tracking}
+        touchZoom={!tracking}
+        touchRotate={!tracking}
+        onInteractionStateChange={(iState)=>this.handleInteractions(iState, tracking)}
         onViewportChange={this.handleViewportChange}
         transitionInterpolator={new LinearInterpolator()}
         mapboxApiAccessToken={MAPBOX_TOKEN}
@@ -107,6 +114,7 @@ const mapStateToProps = state => {
   return {
     animateIcons: state.animateIcons,
     mapView: state.mapView,
+    tracking: state.mapMode.tracking,
     displayStreets: state.displaySettings.stNames
   };
 }

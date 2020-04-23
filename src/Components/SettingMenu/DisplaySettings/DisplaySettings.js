@@ -9,7 +9,7 @@ import Switch from '@material-ui/core/Switch';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 
-import styles from '../Style/styles';
+import styles from '../style/styles';
 import * as actionCreators from '../../../store/actions/actions';
 
 // map key in global store to label

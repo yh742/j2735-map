@@ -28,7 +28,7 @@ export default {
         listen: true,
     },
     mapMode: {
-        worldView: true,
+        tracking: false,
         targetId: null,
     },
     error: {

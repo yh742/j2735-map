@@ -3,7 +3,7 @@ import { withStyles } from '@material-ui/core';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 
-import styles from './Style/styles';
+import styles from './style/styles';
 import DisplaySettings from './DisplaySettings/DisplaySettings';
 import MessageSettings from './MessageSettings/MessageSettings';
 

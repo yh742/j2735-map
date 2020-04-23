@@ -59,11 +59,11 @@ export const setMapView = (view) => {
     };
 }
 
-export const setMapMode = (target, worldView) => {
+export const setMapMode = (target, tracking) => {
     return {
         type: actionTypes.SET_MAPMODE,
         payload: {
-            worldView: worldView,
+            tracking: tracking,
             targetId: target,
         }
     }

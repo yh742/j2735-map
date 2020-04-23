@@ -147,7 +147,7 @@ export default class BufferedMessageClient {
             [id]: {
                 topic: topic,
                 msgType: msgType,
-                long: ParseLocation(long),
+                long: ParseLocation(long), 
                 lat: ParseLocation(lat),
                 speed: ParseSpeed(speed),
                 heading: ParseHeading(heading),

@@ -8,7 +8,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import MapIcon from '@material-ui/icons/Map';
 import SettingIcon from '@material-ui/icons/Settings';
 
-import styles from '../Style/styles'
+import styles from '../style/styles'
 
 const NavigationMenu = ({classes}) => {
     return (
