@@ -28,9 +28,10 @@ export function ScaleMarker(lat, zoom, msgType) {
 }
 
 export function DecodeTopicType(topic) {
+    if (topic === null) return "";
     let cleanTopic = topic.toUpperCase().replace("VZCV2X/1/IN/", "");
     let splits = cleanTopic.split('/');
-    if (splits.length === 0) return "Not Available";
+    if (splits.length === 0) return "";
     switch (splits[0]) {
         case "VEH":
             return "Vehicle";
@@ -43,7 +44,7 @@ export function DecodeTopicType(topic) {
         case "RSU":
             return "RSU";
         default:
-            return "Not Available";
+            return "";
     }
 }
 

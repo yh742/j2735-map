@@ -82,6 +82,7 @@ class Map extends Component {
         onResize={this.handleMapResize}
         dragPan={!tracking}
         dragRotate={!tracking}
+        scrollZoom={!tracking}
         doubleClickZoom={!tracking}
         touchZoom={!tracking}
         touchRotate={!tracking}

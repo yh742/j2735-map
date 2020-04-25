@@ -57,7 +57,7 @@ export default class BufferedMessageClient {
         if ("BasicSafetyMessage" in jsonObj.MessageFrame.value) {
           this.convertMessages(
             jsonObj.MessageFrame.value.BasicSafetyMessage.coreData,
-            jsonObj.MessageFrame.source? jsonObj.MessageFrame.source: topic,
+            jsonObj.MessageFrame.source? jsonObj.MessageFrame.source: null,
             "BSM"
             );
         } else if ("PersonalSafetyMessage" in jsonObj.MessageFrame.value){
@@ -142,9 +142,10 @@ export default class BufferedMessageClient {
 
     convertMessages = (msgObj, topic, msgType) => {
         const { heading, id, long, lat, speed } = msgObj;
+        let cleanId = id.replace(/[^a-z0-9]|\s+|\r?\n|\r/gmi, "");
         this.msgBuffer = {
             ...this.msgBuffer,
-            [id]: {
+            [cleanId]: {
                 topic: topic,
                 msgType: msgType,
                 long: ParseLocation(long), 

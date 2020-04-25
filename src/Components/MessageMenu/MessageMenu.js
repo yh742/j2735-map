@@ -1,4 +1,5 @@
 import clsx from 'clsx';
+import axios from 'axios';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import List from '@material-ui/core/List';
@@ -13,15 +14,7 @@ import MessageMenuHeader from './MessageMenuHeader/MessageMenuHeader';
 import * as actionCreators from '../../store/actions/actions';
 import { DecodeTopicType } from '../Helper/Utility';
 
-const defaultView = {
-  id: "-", 
-  ttl: "0",
-  topic: "Inactive",
-  long: "-",
-  lat: "-",
-  speed: "-",
-  heading: "-"
-};
+
 
 class MessageMenu extends Component {
   
@@ -29,10 +22,8 @@ class MessageMenu extends Component {
     super(props);
     this.refreshJob = null;
     this.trackingJob = null;
+    this.topicSwitch = false;
     this.state = {
-      targetStats: {
-        ...defaultView
-      },
       selected: null,
       markerSnap: {},
     };
@@ -52,36 +43,62 @@ class MessageMenu extends Component {
   }
 
   publishView(targetId) {
-    const { markers } = this.props;
+    const { markers, bearing } = this.props;
     if (targetId in markers) {
-      const {long, lat} = markers[targetId];
+      const {long, lat, heading} = markers[targetId];
+      // if (Math.abs(heading)-Math.abs(bearing) > 5) {
+      //   console.log("pausing animation", this.props.animationIcons, heading, bearing);
+      //   this.props.pauseAnimation(this.props.animateIcons, 1000);
+      // }
       this.props.setMapView({
         longitude: long,
         latitude: lat,
-        transitionDuration: window.production.animate
-      });
-      this.setState({
-        targetStats: {
-          id: markers[targetId].id,
-          ttl: markers[targetId].ttl,
-          topic: markers[targetId].topic,
-          long: markers[targetId].long.toFixed(4) + "°",
-          lat: markers[targetId].lat.toFixed(4) + "°",
-          speed: markers[targetId].speed.toFixed(2) + " km/h",
-          heading: markers[targetId].heading.toFixed(1) + "°"
-        }
+        //bearing: heading,
+        zoom: 19,
+        transitionDuration: window.production.animate,
       });
       return;
     }
-    this.setState({
-      targetStats: defaultView
-    });
-    if (this.trackingJob) this.clearIntervalJob();
+    // if (this.trackingJob) this.clearIntervalJob();
   }
 
   handleStopButtonClick = () => {
     this.props.setMapMode(null, false);
     if (this.trackingJob) this.clearIntervalJob();
+    if (this.topicSwitch) {
+      axios.all([
+        axios({
+          method: 'PUT',
+          url: window.production.httpIn,
+          data: {
+            SubTopic: 'VZCV2X/1/IN/#',
+            Format: "json"
+          },
+          auth: {
+            ...window.production.httpAuth
+          }
+        }),
+        axios({
+          method: 'PUT',
+          url: window.production.httpOut,
+          data: {
+            SubTopic: 'blah',
+          },
+          auth: {
+            ...window.production.httpAuth
+          }
+        })
+      ])
+      .then(axios.spread((inRes, outRes) => {
+        if (inRes.status !== 200 || outRes.status !== 200) {
+          this.props.addError(`Received code ${inRes.status},  ${outRes.status} from http server!`)
+          return 
+        }
+        this.topicSwitch = false;
+        this.props.clearMarkers();
+        setTimeout(this.refresh, 3000);
+      }));
+    }
   }
 
   handleButtonClick = (evt, key, source) => {
@@ -101,11 +118,59 @@ class MessageMenu extends Component {
       transitionDuration: 0,
       zoom: this.props.zoom > 19? this.props.zoom: 19
     });
-    console.log("set tracking id to ", key);
     this.props.setMapMode(key, true);
     this.clearIntervalJob();
-    if (source === "Camera") {
-      this.trackingJob = setInterval(() => this.publishView(key), window.production.animate);
+    switch (source) {
+      case "Camera":
+        this.trackingJob = setInterval(() => this.publishView(key), window.production.animate);
+        this.topicSwitch = false;
+        break;
+      case "Vehicle":
+        let splits = this.props.markers[key].topic.replace('IN','OUT').split('/');
+        if (splits.length < 7) {
+          this.props.addError(`The topic format "${this.props.markers[key].topic}" doesn't look right...`);
+          return;
+        }
+        let newTopic = splits.slice(0,7).join('/') + "/#";
+        axios.all([
+          axios({
+            method: 'PUT',
+            url: window.production.httpIn,
+            data: {
+              SubTopic: this.props.markers[key].topic,
+              Format: "json"
+            },
+            auth: {
+              ...window.production.httpAuth
+            }
+          }),
+          axios({
+            method: 'PUT',
+            url: window.production.httpOut,
+            data: {
+              SubTopic: newTopic,
+              Format: "json"
+            },
+            auth: {
+              ...window.production.httpAuth
+            }
+          })
+        ])
+        .then(axios.spread((inRes, outRes) => {
+          if (inRes.status !== 200 || outRes.status !== 200) {
+            this.props.addError(`Received code ${inRes.status},  ${outRes.status} from http server!`)
+            return 
+          }
+          console.log(this.props.mapMode);
+          this.topicSwitch = true;
+          this.props.clearMarkers();
+          this.trackingJob = setInterval(() => this.publishView(key), window.production.animate);
+          setTimeout(this.refresh, 3000);
+        }));
+        break;
+      default:
+        this.props.addError("This is not a supported source type."); 
+        return;
     }
     this.container.scrollTop = 0;
   }
@@ -137,22 +202,46 @@ class MessageMenu extends Component {
     }
   }
 
-  // refreshMenu = () => {
-  //   if (this.props.showMenu) this.setState({markerSnap: this.props.markers});
-  // }
-
-  // only re-render component when menu is open
-  shouldComponentUpdate(nextProps) {
-    return this.props.showMenu || nextProps.showMenu;
+  // only re-render component when (1) menu switch states (2) states change while menu is open
+  shouldComponentUpdate(nextProps, nextStates) {
+    return (this.props.showMenu !== nextProps.showMenu) || 
+      ((this.props.showMenu || nextProps.showMenu) && (this.state !== nextStates)) || 
+      (this.props.mapMode.tracking !== nextProps.mapMode.tracking);
+  }
+  
+  componentDidUpdate(prevProps) {
+    if (!prevProps.showMenu && this.props.showMenu) {
+      this.refresh();
+    }
   }
 
-  componentDidUpdate(prevProps) {
-    if (this.props.showMenu && !prevProps.showMenu) this.setState({markerSnap: this.props.markers});
+  componentWillUnmount() {
+    clearInterval(this.refreshJob);
+  }
+
+  componentDidMount() {
+    axios({
+      method: 'PUT',
+      url: window.production.httpIn,
+      data: {
+        SubTopic: 'VZCV2X/1/IN/#',
+        Format: "json"
+      },
+      auth: {
+        ...window.production.httpAuth
+      }
+    }).then((res) => {
+      if (res.status !== 200) {
+        this.props.addError(`Received code ${res.status} from http server!`)
+        return 
+      }
+      this.topicSwitch = false;
+    });
+    this.refreshJob = setInterval(this.refresh, 8000);
   }
 
   render() {
     const {classes, showMenu, mapMode} = this.props;
-    let targetId =  mapMode.targetId;
     return (
       <Drawer
         classes={{paper: clsx(classes.drawerPaper, !showMenu && classes.drawerPaperClose)}}
@@ -163,15 +252,7 @@ class MessageMenu extends Component {
         <List dense classes={{root: classes.menuList}} ref={el => this.container = el}>
         { mapMode.tracking? 
           (<><MessageMenuHeader text="Message Details" button={false} refresh={null} />
-            <TrackingMenu 
-                id={targetId}
-                ttl={this.state.targetStats.ttl}
-                topic={this.state.targetStats.topic}
-                long={this.state.targetStats.long}
-                lat={this.state.targetStats.lat}
-                speed={this.state.targetStats.speed}
-                heading={this.state.targetStats.heading}
-                handleStopButtonClick={this.handleStopButtonClick} /></>) : null }
+            <TrackingMenu handleStopButtonClick={this.handleStopButtonClick} /></>) : null }
           <MessageMenuHeader text="Message Tracker" button={true} refresh={this.refresh} />
           { Object.keys(this.state.markerSnap).length > 0 
               ? Object.keys(this.state.markerSnap).map(key => ( 
@@ -184,7 +265,7 @@ class MessageMenu extends Component {
                   itemClick={() => this.handleItemClick(key)}
                   msgType={this.state.markerSnap[key].msgType} 
                   source={DecodeTopicType(this.state.markerSnap[key].topic)} />))
-              : <EmptyItem /> }
+              : <EmptyItem tracking={mapMode.tracking} /> }
         </List>
       </Drawer>
     );
@@ -196,12 +277,15 @@ const mapStateToProps = state => {
     mapMode: state.mapMode,
     markers: state.markers,
     zoom: state.mapView.zoom,
+    bearing: state.mapView.bearing,
     animationIcons: state.animateIcons
   };
 };
 
 const mapDispatchToProps = dispatch => {
   return {
+      clearMarkers: () => dispatch(actionCreators.clearMarkers()),
+      setAnimation: (on) => dispatch(actionCreators.setAnimation(on)),
       pauseAnimation: (onNow, time) => dispatch(actionCreators.pauseAnimation(onNow, time)),
       addError: (msg) => dispatch(actionCreators.addError(msg)),
       setMapView: (view) => dispatch(actionCreators.setMapView(view)),

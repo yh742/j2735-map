@@ -30,6 +30,11 @@ const styles = (theme) => ({
     marginLeft: "64px", 
     paddingTop: "35VH"
   },
+  emptyItemTracking: {
+    marginTop: "8px", 
+    marginLeft: "64px", 
+    paddingTop: "15VH"
+  },
   listIcon: {
     [theme.breakpoints.up('sm')]: {
         paddingLeft: theme.spacing(1),

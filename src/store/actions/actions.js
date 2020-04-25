@@ -1,5 +1,11 @@
 import * as actionTypes from './actionTypes';
 
+export const clearMarkers = () => {
+    return {
+        type: actionTypes.CLEAR_MARKERS
+    };
+}
+
 export const updateSPAT = (spat) => {
     return {
         type: actionTypes.UPDATE_SPAT,

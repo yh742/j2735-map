@@ -19,6 +19,11 @@ const reducer = (state = initialStates, action) => {
                     ...action.payload
                 }
             };
+        case actionTypes.CLEAR_MARKERS:
+            return  {
+                ...state,
+                markers: {}
+            };
         case actionTypes.UPDATE_MARKER:
             let updatedTTL = {};
             for (const key in state.markers) {

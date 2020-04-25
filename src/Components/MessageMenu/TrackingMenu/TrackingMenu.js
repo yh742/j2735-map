@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import List from '@material-ui/core/List';
 import Button from '@material-ui/core/Button';
 import Divider from '@material-ui/core/Divider';
@@ -7,6 +8,16 @@ import ListItemText from '@material-ui/core/ListItemText';
 import { withStyles } from '@material-ui/core/styles';
 
 import styles from '../style/styles';
+
+const defaultView = {
+    id: "-", 
+    ttl: "0",
+    topic: "Inactive",
+    long: "-",
+    lat: "-",
+    speed: "-",
+    heading: "-"
+};
 
 const TrackingMenu =  React.memo(({ classes, id, ttl, topic, long, lat, speed, heading, handleStopButtonClick }) => {
     return (
@@ -53,5 +64,17 @@ const TrackingMenu =  React.memo(({ classes, id, ttl, topic, long, lat, speed, h
         </List>)
 });
 
-export default withStyles(styles)(TrackingMenu);
+const mapStateToProps = state => {
+    return {
+        id: state.mapMode.targetId in state.markers? state.mapMode.targetId: defaultView.id,
+        ttl: state.mapMode.targetId in state.markers? state.markers[state.mapMode.targetId].ttl: defaultView.ttl,
+        topic: state.mapMode.targetId in state.markers? state.markers[state.mapMode.targetId].topic: defaultView.topic,
+        long: state.mapMode.targetId in state.markers? state.markers[state.mapMode.targetId].long.toFixed(4)  + "°": defaultView.long,
+        lat: state.mapMode.targetId in state.markers? state.markers[state.mapMode.targetId].lat.toFixed(4)  + "°": defaultView.lat,
+        speed: state.mapMode.targetId in state.markers? state.markers[state.mapMode.targetId].speed.toFixed(2)  + " km/h": defaultView.speed,
+        heading: state.mapMode.targetId in state.markers? state.markers[state.mapMode.targetId].heading.toFixed(1)  + "°": defaultView.heading,
+    };
+};
+
+export default connect(mapStateToProps, null)(withStyles(styles)(TrackingMenu));
 
