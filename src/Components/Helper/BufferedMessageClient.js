@@ -73,6 +73,8 @@ export default class BufferedMessageClient {
             this.convertSpatMessages(
                 jsonObj.MessageFrame.value.SPAT.intersections.IntersectionState.states.MovementState,
             )
+        } else {
+            console.log("can't convert: ", jsonObj)
         }
     }
 
