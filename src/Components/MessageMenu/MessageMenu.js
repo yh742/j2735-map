@@ -1,5 +1,4 @@
 import clsx from 'clsx';
-import axios from 'axios';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import List from '@material-ui/core/List';
@@ -13,6 +12,7 @@ import TrackingMenu from './TrackingMenu/TrackingMenu';
 import MessageMenuHeader from './MessageMenuHeader/MessageMenuHeader';
 import * as actionCreators from '../../store/actions/actions';
 import { DecodeTopicType } from '../Helper/Utility';
+import { SwitchDecoderTopic } from '../Helper/ExternalCalls';
 
 
 
@@ -43,61 +43,31 @@ class MessageMenu extends Component {
   }
 
   publishView(targetId) {
-    const { markers, bearing } = this.props;
+    const { markers } = this.props;
     if (targetId in markers) {
-      const {long, lat, heading} = markers[targetId];
-      // if (Math.abs(heading)-Math.abs(bearing) > 5) {
-      //   console.log("pausing animation", this.props.animationIcons, heading, bearing);
-      //   this.props.pauseAnimation(this.props.animateIcons, 1000);
-      // }
+      const {long, lat } = markers[targetId];
       this.props.setMapView({
         longitude: long,
         latitude: lat,
-        //bearing: heading,
-        zoom: 19,
         transitionDuration: window.production.animate,
       });
       return;
     }
-    // if (this.trackingJob) this.clearIntervalJob();
   }
 
   handleStopButtonClick = () => {
     this.props.setMapMode(null, false);
     if (this.trackingJob) this.clearIntervalJob();
     if (this.topicSwitch) {
-      axios.all([
-        axios({
-          method: 'PUT',
-          url: window.production.httpIn,
-          data: {
-            SubTopic: 'VZCV2X/1/IN/#',
-            Format: "json"
-          },
-          auth: {
-            ...window.production.httpAuth
-          }
-        }),
-        axios({
-          method: 'PUT',
-          url: window.production.httpOut,
-          data: {
-            SubTopic: 'blah',
-          },
-          auth: {
-            ...window.production.httpAuth
-          }
-        })
-      ])
-      .then(axios.spread((inRes, outRes) => {
-        if (inRes.status !== 200 || outRes.status !== 200) {
-          this.props.addError(`Received code ${inRes.status},  ${outRes.status} from http server!`)
+      SwitchDecoderTopic('VZCV2X/1/IN/#', 'json').then((res) => {
+        if (res.status !== 200) {
+          this.props.addError(`Received code ${res.status} from http server!`)
           return 
         }
         this.topicSwitch = false;
         this.props.clearMarkers();
-        setTimeout(this.refresh, 3000);
-      }));
+        setTimeout(this.refresh, 500);
+      });
     }
   }
 
@@ -116,7 +86,7 @@ class MessageMenu extends Component {
       latitude: this.props.markers[key].lat,
       bearing: 0,
       transitionDuration: 0,
-      zoom: this.props.zoom > 19? this.props.zoom: 19
+      zoom: this.props.zoom > 18? this.props.zoom: 18
     });
     this.props.setMapMode(key, true);
     this.clearIntervalJob();
@@ -132,41 +102,16 @@ class MessageMenu extends Component {
           return;
         }
         let newTopic = splits.slice(0,7).join('/') + "/#";
-        axios.all([
-          axios({
-            method: 'PUT',
-            url: window.production.httpIn,
-            data: {
-              SubTopic: this.props.markers[key].topic,
-              Format: "json"
-            },
-            auth: {
-              ...window.production.httpAuth
-            }
-          }),
-          axios({
-            method: 'PUT',
-            url: window.production.httpOut,
-            data: {
-              SubTopic: newTopic,
-              Format: "json"
-            },
-            auth: {
-              ...window.production.httpAuth
-            }
-          })
-        ])
-        .then(axios.spread((inRes, outRes) => {
-          if (inRes.status !== 200 || outRes.status !== 200) {
-            this.props.addError(`Received code ${inRes.status},  ${outRes.status} from http server!`)
+        SwitchDecoderTopic(newTopic, "json").then((res) => {
+          if (res.status !== 200) {
+            this.props.addError(`Received code ${res.status} from http server!`)
             return 
           }
-          console.log(this.props.mapMode);
           this.topicSwitch = true;
           this.props.clearMarkers();
           this.trackingJob = setInterval(() => this.publishView(key), window.production.animate);
-          setTimeout(this.refresh, 3000);
-        }));
+          setTimeout(this.refresh, 1000);
+        });
         break;
       default:
         this.props.addError("This is not a supported source type."); 
@@ -197,7 +142,7 @@ class MessageMenu extends Component {
         longitude: this.props.markers[key].long, 
         latitude: this.props.markers[key].lat,
         transitionDuration: 0,
-        zoom: this.props.zoom > 19? this.props.zoom: 19
+        zoom: this.props.zoom > 18? this.props.zoom: 18
       });
     }
   }
@@ -220,24 +165,14 @@ class MessageMenu extends Component {
   }
 
   componentDidMount() {
-    axios({
-      method: 'PUT',
-      url: window.production.httpIn,
-      data: {
-        SubTopic: 'VZCV2X/1/IN/#',
-        Format: "json"
-      },
-      auth: {
-        ...window.production.httpAuth
-      }
-    }).then((res) => {
+    SwitchDecoderTopic('VZCV2X/1/IN/#', 'json').then((res)=>{
       if (res.status !== 200) {
         this.props.addError(`Received code ${res.status} from http server!`)
         return 
       }
       this.topicSwitch = false;
     });
-    this.refreshJob = setInterval(this.refresh, 8000);
+    this.refreshJob = setInterval(this.refresh, 1000);
   }
 
   render() {

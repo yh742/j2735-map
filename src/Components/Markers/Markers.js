@@ -5,7 +5,7 @@ import { withStyles } from '@material-ui/core';
 import Marker from './Marker/Marker';
 import styles from './style/styles';
 
-const Markers = ({ inViewPort, markers, targetedMarker, popupEnabled, animateIcons, zoom, bearing }) => {
+const Markers = ({ inViewPort, markers, targetedMarker, popupEnabled, animateIcons, zoom, tracking, bearing }) => {
     // only render markers that are in viewport 
     const inViewMarkers = Object.keys(markers).filter(key => inViewPort(markers[key].long, markers[key].lat))
     return (
@@ -18,6 +18,7 @@ const Markers = ({ inViewPort, markers, targetedMarker, popupEnabled, animateIco
             return (
                 <div key={key}>
                 <Marker
+                    tracking={tracking}
                     highlight={key === targetedMarker? true: false}
                     popup={popupEnabled}
                     animateIcons={animateIcons} 
@@ -37,6 +38,7 @@ const Markers = ({ inViewPort, markers, targetedMarker, popupEnabled, animateIco
 const mapStateToProps = state => {
     return {
         markers: state.markers, 
+        tracking: state.mapMode.tracking,
         targetedMarker: state.mapMode.targetId,
         popupEnabled: state.displaySettings.vehPopup,
         animateIcons: state.animateIcons,
