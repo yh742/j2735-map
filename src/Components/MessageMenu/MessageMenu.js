@@ -13,8 +13,7 @@ import MessageMenuHeader from './MessageMenuHeader/MessageMenuHeader';
 import * as actionCreators from '../../store/actions/actions';
 import { DecodeTopicType } from '../Helper/Utility';
 import { SwitchDecoderTopic } from '../Helper/ExternalCalls';
-
-
+import { FindClosestIntersection } from '../MCityCustom/MCityInfo';
 
 class MessageMenu extends Component {
   
@@ -24,6 +23,8 @@ class MessageMenu extends Component {
     this.trackingJob = null;
     this.topicSwitch = false;
     this.state = {
+      loading: false,
+      closestIntersection: {},
       selected: null,
       markerSnap: {},
     };
@@ -31,7 +32,6 @@ class MessageMenu extends Component {
 
   // forceUpdate skips shouldComponentUpdate
   refresh = () => {
-    // this.forceUpdate();
     this.setState({markerSnap: this.props.markers})
   }
   
@@ -46,6 +46,12 @@ class MessageMenu extends Component {
     const { markers } = this.props;
     if (targetId in markers) {
       const {long, lat } = markers[targetId];
+      let min = FindClosestIntersection(lat, long, 0.04);
+      if (min.streets) {
+        this.setState({closestIntersection: min});
+      } else if(Object.keys(this.state.closestIntersection).length !== 0) {
+        this.setState({closestIntersection: {}});
+      }
       this.props.setMapView({
         longitude: long,
         latitude: lat,
@@ -59,6 +65,7 @@ class MessageMenu extends Component {
     this.props.setMapMode(null, false);
     if (this.trackingJob) this.clearIntervalJob();
     if (this.topicSwitch) {
+      this.setState({loading: true});
       SwitchDecoderTopic('VZCV2X/1/IN/#', 'json').then((res) => {
         if (res.status !== 200) {
           this.props.addError(`Received code ${res.status} from http server!`)
@@ -67,6 +74,7 @@ class MessageMenu extends Component {
         this.topicSwitch = false;
         this.props.clearMarkers();
         setTimeout(this.refresh, 500);
+        setTimeout(()=> this.setState({loading: false}), 1000);
       });
     }
   }
@@ -86,7 +94,7 @@ class MessageMenu extends Component {
       latitude: this.props.markers[key].lat,
       bearing: 0,
       transitionDuration: 0,
-      zoom: this.props.zoom > 18? this.props.zoom: 18
+      // zoom: this.props.zoom > 18.5? this.props.zoom: 18.5
     });
     this.props.setMapMode(key, true);
     this.clearIntervalJob();
@@ -102,15 +110,18 @@ class MessageMenu extends Component {
           return;
         }
         let newTopic = splits.slice(0,7).join('/') + "/#";
+        this.setState({loading: true});
+        
         SwitchDecoderTopic(newTopic, "json").then((res) => {
           if (res.status !== 200) {
             this.props.addError(`Received code ${res.status} from http server!`)
             return 
           }
-          this.topicSwitch = true;
           this.props.clearMarkers();
+          this.topicSwitch = true;
           this.trackingJob = setInterval(() => this.publishView(key), window.production.animate);
-          setTimeout(this.refresh, 1000);
+          this.refresh();
+          setTimeout(()=> this.setState({loading: false}), 1000);
         });
         break;
       default:
@@ -172,7 +183,7 @@ class MessageMenu extends Component {
       }
       this.topicSwitch = false;
     });
-    this.refreshJob = setInterval(this.refresh, 1000);
+    this.refreshJob = setInterval(this.refresh, 6000);
   }
 
   render() {
@@ -184,10 +195,11 @@ class MessageMenu extends Component {
         anchor="right"
         open={showMenu}>
         <div className={classes.toolbarSpacer} />
+        { this.state.loading? <div style={{position: "absolute", display: "inline-block", height: "100vh", width: "100vw", filter: "blur(10px)", zIndex: "100", backgroundColor: "white", opacity: "0.6"}}></div>: null}
         <List dense classes={{root: classes.menuList}} ref={el => this.container = el}>
         { mapMode.tracking? 
           (<><MessageMenuHeader text="Message Details" button={false} refresh={null} />
-            <TrackingMenu handleStopButtonClick={this.handleStopButtonClick} /></>) : null }
+            <TrackingMenu intersection={this.state.closestIntersection} handleStopButtonClick={this.handleStopButtonClick} /></>) : null }
           <MessageMenuHeader text="Message Tracker" button={true} refresh={this.refresh} />
           { Object.keys(this.state.markerSnap).length > 0 
               ? Object.keys(this.state.markerSnap).map(key => ( 

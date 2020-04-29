@@ -27,7 +27,7 @@ const MessageItem = React.memo(({ classes, id, disable, itemClick, buttonClick, 
                 variant="outlined" 
                 onClick={buttonClick} 
                 color={source === "Vehicle" ? "secondary": "primary"} 
-                className={classes.trackButton}>{source === "Vehicle"? "MODE": "TRACK"}</Button>: null}
+                className={classes.trackButton}>Track</Button>: null}
         </ListItem>)
 });
 

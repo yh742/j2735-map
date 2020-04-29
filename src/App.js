@@ -72,7 +72,7 @@ class App extends Component {
   handleMessageMenuToggle = () => {
     this.setState(prevState => ({
         showMessageMenu: !prevState.showMessageMenu,
-    }), () => this.props.setNotification(0, this.state.showMessageMenu));
+    }), () => this.props.setNotification(0, !this.state.showMessageMenu));
   }
 
   render() {

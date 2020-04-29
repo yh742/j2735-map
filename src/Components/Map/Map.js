@@ -5,9 +5,10 @@ import Geocoder from 'react-map-gl-geocoder';
 import ReactMapGL, { Layer, NavigationControl, LinearInterpolator } from 'react-map-gl';
 
 import styles from './style/styles';
-import Markers from '../Markers/Markers'
-import RoadLabels from './Assets/Layers/RoadLabels'
-import SpatLayers from './SpatLayers/SpatLayers'
+import Markers from '../Markers/Markers';
+import RoadLabels from '../MCityCustom/Assets/Layers/RoadLabels';
+import SpatLayers from '../MCityCustom/SpatLayers/SpatLayers';
+import { DistanceFromIntersection } from '../MCityCustom/MCityInfo';
 import BufferedMessageClient from '../Helper/BufferedMessageClient';
 import * as actionCreators from '../../store/actions/actions';
 
@@ -103,7 +104,7 @@ class Map extends Component {
           <NavigationControl />
         </div>
         <Layer {...RoadLabels} layout={{...RoadLabels.layout, "visibility": displayStreets? "visible": "none"}}/>
-        <SpatLayers />
+        { DistanceFromIntersection("2573", mapView.longitude, mapView.latitude) < 1? <SpatLayers />: null }
         { mapView.zoom > 16.5 && this.mapRef.current? 
             <Markers inViewPort={(long, lat) => this.mapRef.current.getMap().getBounds().contains([long, lat])} />: null }
       </ReactMapGL>

@@ -35,8 +35,8 @@ const CustomMarker = React.memo(({ classes, tracking, highlight, popup, animateI
                 alt="message marker"
                 src={msgType === "BSM"? CarIcon: PedIcon}
                 style={{
-                    filter: highlight? `drop-shadow(0px 0px 7px rgba(255, 255, 255, 1))`: "none",
-                    opacity: highlight? "1": "0.5",
+                    filter: highlight? `drop-shadow(0px 0px 15px rgba(255, 255, 255, 1))`: "none",
+                    opacity: highlight? "1": "0.7",
                     width: markerWidth,
                     height: markerHeight,
                     transform: `rotate(${Rotate(heading, mapBearing)}deg)`}} />

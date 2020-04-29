@@ -19,7 +19,7 @@ const defaultView = {
     heading: "-"
 };
 
-const TrackingMenu =  React.memo(({ classes, id, ttl, topic, long, lat, speed, heading, handleStopButtonClick }) => {
+const TrackingMenu =  React.memo(({ classes, id, ttl, topic, long, lat, speed, heading, handleStopButtonClick, intersection }) => {
     return (
         <List>
             <ListItem>
@@ -32,6 +32,13 @@ const TrackingMenu =  React.memo(({ classes, id, ttl, topic, long, lat, speed, h
                     classes={{ primary: classes.wordWrap }}
                     primary={topic}
                     secondary="Message Source Topic" />
+            </ListItem>
+            <ListItem>
+                <ListItemText 
+                    className={classes.listStartEntry}
+                    classes={{ primary: classes.wordWrap }}
+                    primary={intersection.streets? intersection.streets[0] + " & " + intersection.streets[1]: "-"}
+                    secondary="Closest Intersection" />
             </ListItem>
             <ListItem>
                 <ListItemText 

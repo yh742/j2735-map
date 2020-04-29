@@ -25,10 +25,10 @@ export default class BufferedMessageClient {
     }
 
     intervalJob(dispatchers) {
+        dispatchers.updateNotification(Object.keys(this.msgBuffer));
         dispatchers.updateMarker(this.msgBuffer);
         dispatchers.updateSPAT(this.spatMessagesBuffer);
         dispatchers.updateSignals(this.spatLightsBuffer);
-        dispatchers.updateNotification(Object.keys(this.msgBuffer));
         this.clearBuffer()
     }
 
