@@ -6,12 +6,14 @@ export default class BufferedMessageClient {
         this.msgBuffer = {};
         this.spatLightsBuffer = {};
         this.spatMessagesBuffer = {};
+        // make sure keepalive here is less than 60 seconds
         this.client = mqtt.connect(window.production.server, {
             port: window.production.port,
             host: window.production.server,
-            clientId: 'mqttjs_' + Math.random().toString(16).substr(2, 8),
-        }).on("connect", () => {
-            console.log("connected to mqtt", this.client);
+            keepalive: 30,
+            clientId: 'mqttjs_' + Math.random().toString(16).substr(2, 8) + 32,
+        }).on("connect", (connack) => {
+            console.log("connected to mqtt", connack, this.client);
             this.client.subscribe(window.production.topic, (err) => {
                 if (err) {
                     console.log("couldn't subscribe to mqtt server");
@@ -19,6 +21,10 @@ export default class BufferedMessageClient {
                     return;
                 }
                 this.client.on("message", this.handleMqttMessages);
+            });
+            this.client.on("disconnect", () => {
+                console.log("mqtt broker is disconnecting");
+                dispatchers.addError("Disconnecting from MQTT server!");
             });
         });
         this.interval = setInterval(() => this.intervalJob(dispatchers), timerInterval);
