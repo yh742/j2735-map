@@ -19,7 +19,7 @@ const defaultView = {
     heading: "-"
 };
 
-const TrackingMenu =  React.memo(({ classes, id, ttl, topic, long, lat, speed, heading, handleStopButtonClick, intersection }) => {
+const TrackingMenu = React.memo(({ classes, id, ttl, topic, long, lat, speed, heading, handleStopButtonClick, intersection }) => {
     return (
         <List>
             <ListItem>
@@ -72,15 +72,22 @@ const TrackingMenu =  React.memo(({ classes, id, ttl, topic, long, lat, speed, h
 });
 
 const mapStateToProps = state => {
-    return {
-        id: state.mapMode.targetId in state.markers? state.mapMode.targetId: defaultView.id,
-        ttl: state.mapMode.targetId in state.markers? state.markers[state.mapMode.targetId].ttl: defaultView.ttl,
-        topic: state.mapMode.targetId in state.markers? state.markers[state.mapMode.targetId].topic: defaultView.topic,
-        long: state.mapMode.targetId in state.markers? state.markers[state.mapMode.targetId].long.toFixed(4)  + "°": defaultView.long,
-        lat: state.mapMode.targetId in state.markers? state.markers[state.mapMode.targetId].lat.toFixed(4)  + "°": defaultView.lat,
-        speed: state.mapMode.targetId in state.markers? state.markers[state.mapMode.targetId].speed.toFixed(2)  + " km/h": defaultView.speed,
-        heading: state.mapMode.targetId in state.markers? state.markers[state.mapMode.targetId].heading.toFixed(1)  + "°": defaultView.heading,
-    };
+    let valid = state.mapMode.targetId in state.markers;
+    if (valid) {
+        return {
+            id: state.mapMode.targetId,
+            ttl: state.markers[state.mapMode.targetId].ttl,
+            topic: state.markers[state.mapMode.targetId].topic,
+            long: state.markers[state.mapMode.targetId].long.toFixed(4),
+            lat: state.markers[state.mapMode.targetId].lat.toFixed(4),
+            speed: state.markers[state.mapMode.targetId].speed.toFixed(2),
+            heading: state.markers[state.mapMode.targetId].heading.toFixed(1) 
+        };
+    } else {
+        return {
+            ...defaultView
+        };
+    }
 };
 
 export default connect(mapStateToProps, null)(withStyles(styles)(TrackingMenu));

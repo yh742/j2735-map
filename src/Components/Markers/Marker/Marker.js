@@ -11,8 +11,9 @@ import {Rotate, ScaleMarker} from '../../Helper/Utility';
 const CustomMarker = React.memo(({ classes, tracking, highlight, popup, animateIcons, lat, long, msgType, heading, speed, zoom, mapBearing }) => {
     let markerSize = msgType === "BSM"? 4: 3;
     let markerHeight = ScaleMarker(lat, zoom, markerSize);
-    let markerWidth = (146/278)*markerHeight;
-    let radius = highlight? ScaleMarker(lat, zoom, 100): 0;
+    // (146/278) ratio of image dimension of the car, (618/489) ratio of image dimension of the pedestrian
+    let markerWidth = msgType === "BSM"? (146/278) * markerHeight: (618/489) * markerHeight;
+    let diameter = highlight? ScaleMarker(lat, zoom, window.production.radius * 2): 0;
     return (
         <Marker className={clsx((animateIcons && speed > 1) && classes.transition)} 
             draggable={false}
@@ -20,11 +21,11 @@ const CustomMarker = React.memo(({ classes, tracking, highlight, popup, animateI
             longitude={long}>
             {highlight && tracking?  <div style={{
                 position: "absolute",
-                top: `-${(radius+markerHeight)/2}px`,
-                left: `-${(radius+markerWidth)/2}px`,
+                top: `-${(diameter+markerHeight)/2}px`,
+                left: `-${(diameter+markerWidth)/2}px`,
                 display: "inline-block",
-                height: `${radius}px`,
-                width: `${radius}px`,
+                height: `${diameter}px`,
+                width: `${diameter}px`,
                 borderRadius: "50%",
                 backgroundColor: "White",
                 borderColor: "white",
