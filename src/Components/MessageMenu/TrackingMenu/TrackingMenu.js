@@ -33,13 +33,13 @@ const TrackingMenu = React.memo(({ classes, id, ttl, topic, long, lat, speed, he
                     primary={topic}
                     secondary="Message Source Topic" />
             </ListItem>
-            <ListItem>
+            {/* <ListItem>
                 <ListItemText 
                     className={classes.listStartEntry}
                     classes={{ primary: classes.wordWrap }}
                     primary={intersection.streets? intersection.streets[0] + " & " + intersection.streets[1]: "-"}
                     secondary="Closest Intersection" />
-            </ListItem>
+            </ListItem> */}
             <ListItem>
                 <ListItemText 
                     className={classes.listStartEntry}
@@ -78,10 +78,10 @@ const mapStateToProps = state => {
             id: state.mapMode.targetId,
             ttl: state.markers[state.mapMode.targetId].ttl,
             topic: state.markers[state.mapMode.targetId].topic,
-            long: state.markers[state.mapMode.targetId].long.toFixed(4),
-            lat: state.markers[state.mapMode.targetId].lat.toFixed(4),
-            speed: state.markers[state.mapMode.targetId].speed.toFixed(2),
-            heading: state.markers[state.mapMode.targetId].heading.toFixed(1) 
+            long: state.markers[state.mapMode.targetId].long.toFixed(4) + "°",
+            lat: state.markers[state.mapMode.targetId].lat.toFixed(4) + "°",
+            speed: state.markers[state.mapMode.targetId].speed.toFixed(2) + "KM/H",
+            heading: state.markers[state.mapMode.targetId].heading.toFixed(1) +  "°"
         };
     } else {
         return {

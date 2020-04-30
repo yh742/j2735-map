@@ -12,74 +12,35 @@ import TrackingMenu from './TrackingMenu/TrackingMenu';
 import MessageMenuHeader from './MessageMenuHeader/MessageMenuHeader';
 import * as actionCreators from '../../store/actions/actions';
 import { DecodeTopicType } from '../Helper/Utility';
-import { SwitchDecoderTopic } from '../Helper/ExternalCalls';
-import { FindClosestIntersection } from '../MCityCustom/MCityInfo';
+import MCityTrackingJob from '../MCityCustom/MCityTrackingJob';
 
 class MessageMenu extends Component {
   
   constructor(props) {
     super(props);
     this.refreshJob = null;
-    this.trackingJob = null;
-    this.topicSwitch = false;
     this.state = {
       loading: false,
-      closestIntersection: {},
       selected: null,
       markerSnap: {},
     };
   }
 
-  // forceUpdate skips shouldComponentUpdate
-  refresh = () => {
-    this.setState({markerSnap: this.props.markers})
-  }
-  
-  clearIntervalJob = () => {
+  handleStopButtonClick = async () => {
     if (this.trackingJob) {
-      clearInterval(this.trackingJob);
-      this.trackingJob = null;
-    }
-  }
-
-  publishView(targetId) {
-    const { markers } = this.props;
-    if (targetId in markers) {
-      const {long, lat } = markers[targetId];
-      let min = FindClosestIntersection(lat, long, 0.04);
-      if (min.streets) {
-        this.setState({closestIntersection: min});
-      } else if(Object.keys(this.state.closestIntersection).length !== 0) {
-        this.setState({closestIntersection: {}});
-      }
-      this.props.setMapView({
-        longitude: long,
-        latitude: lat,
-        transitionDuration: window.production.animate,
-      });
-      return;
-    }
-  }
-
-  handleStopButtonClick = () => {
-    this.props.setMapMode(null, false);
-    if (this.trackingJob) this.clearIntervalJob();
-    if (this.topicSwitch) {
+      this.props.clearMarkers();
       this.setState({loading: true});
-      SwitchDecoderTopic('VZCV2X/1/IN/#', 'json').then((res) => {
-        if (res.status !== 200) {
-          this.props.addError(`Received code ${res.status} from http server!`)
-          return 
-        }
-        this.topicSwitch = false;
-        this.props.clearMarkers();
-        setTimeout(this.refresh, 500);
-        setTimeout(()=> this.setState({loading: false}), 1000);
-      });
+      let res = await this.trackingJob.stop();
+      if (!res) return;
+      setTimeout(()=> {
+        this.refresh();
+        this.props.setMapMode(null, false);
+        this.setState({loading: false});
+      }, 1000);
     }
   }
 
-  handleButtonClick = (evt, key, source) => {
+  handleButtonClick = async (evt, key, source) => {
     // don't propogate to outer ListItem
     evt.stopPropagation();
     this.setState({ selected: null });
@@ -88,46 +49,25 @@ class MessageMenu extends Component {
       this.props.addError(`Marker "${key}" doesn't exist on map anymore!`);
       return;
     }
+    // (1) pause animation before we move map (2) set this into tracking mode
     this.props.pauseAnimation(this.props.animationIcons, 300);
-    this.props.setMapView({
-      longitude: this.props.markers[key].long, 
-      latitude: this.props.markers[key].lat,
-      bearing: 0,
-      transitionDuration: 0,
-      // zoom: this.props.zoom > 18.5? this.props.zoom: 18.5
-    });
-    this.props.setMapMode(key, true);
-    this.clearIntervalJob();
-    switch (source) {
-      case "Camera":
-        this.trackingJob = setInterval(() => this.publishView(key), window.production.animate);
-        this.topicSwitch = false;
-        break;
-      case "Vehicle":
-        let splits = this.props.markers[key].topic.replace('IN','OUT').split('/');
-        if (splits.length < 7) {
-          this.props.addError(`The topic format "${this.props.markers[key].topic}" doesn't look right...`);
-          return;
-        }
-        let newTopic = splits.slice(0,7).join('/') + "/#";
-        this.setState({loading: true});
-        
-        SwitchDecoderTopic(newTopic, "json").then((res) => {
-          if (res.status !== 200) {
-            this.props.addError(`Received code ${res.status} from http server!`)
-            return 
-          }
-          this.props.clearMarkers();
-          this.topicSwitch = true;
-          this.trackingJob = setInterval(() => this.publishView(key), window.production.animate);
-          this.refresh();
-          setTimeout(()=> this.setState({loading: false}), 1000);
-        });
-        break;
-      default:
-        this.props.addError("This is not a supported source type."); 
-        return;
-    }
+    this.trackingJob = new MCityTrackingJob(
+      {
+        intervalCb: this.props.setMapView,
+        errorCb: this.props.addError,
+      },
+      key,
+      this.props.markers,
+      source
+    );
+    this.setState({loading: true});
+    this.props.clearMarkers();
+    let res = await this.trackingJob.run();
+    if (!res) return;
+    setTimeout(()=> {
+      this.props.setMapMode(key, true);
+      this.setState({loading: false})
+    }, 1000);
     this.container.scrollTop = 0;
   }
 
@@ -164,26 +104,19 @@ class MessageMenu extends Component {
       ((this.props.showMenu || nextProps.showMenu) && (this.state !== nextStates)) || 
       (this.props.mapMode.tracking !== nextProps.mapMode.tracking);
   }
-  
-  componentDidUpdate(prevProps) {
-    if (!prevProps.showMenu && this.props.showMenu) {
-      this.refresh();
-    }
-  }
 
   componentWillUnmount() {
     clearInterval(this.refreshJob);
   }
 
   componentDidMount() {
-    SwitchDecoderTopic('VZCV2X/1/IN/#', 'json').then((res)=>{
-      if (res.status !== 200) {
-        this.props.addError(`Received code ${res.status} from http server!`)
-        return 
-      }
-      this.topicSwitch = false;
-    });
+    // refresh the menu every 6 seconds
     this.refreshJob = setInterval(this.refresh, 6000);
+  }
+
+  // forceUpdate skips shouldComponentUpdate
+  refresh = () => {
+    this.setState({markerSnap: this.props.markers})
   }
 
   render() {
@@ -195,11 +128,11 @@ class MessageMenu extends Component {
         anchor="right"
         open={showMenu}>
         <div className={classes.toolbarSpacer} />
-        { this.state.loading? <div style={{position: "absolute", display: "inline-block", height: "100vh", width: "100vw", filter: "blur(10px)", zIndex: "100", backgroundColor: "white", opacity: "0.6"}}></div>: null}
+        { this.state.loading? <div style={{position: "absolute", display: "inline-block", height: "100vh", width: "100vw", filter: "blur(10px)", zIndex: "100", backgroundColor: "white", opacity: "0.9"}}></div>: null}
         <List dense classes={{root: classes.menuList}} ref={el => this.container = el}>
         { mapMode.tracking? 
           (<><MessageMenuHeader text="Message Details" button={false} refresh={null} />
-            <TrackingMenu intersection={this.state.closestIntersection} handleStopButtonClick={this.handleStopButtonClick} /></>) : null }
+            <TrackingMenu handleStopButtonClick={this.handleStopButtonClick} /></>) : null }
           <MessageMenuHeader text="Message Tracker" button={true} refresh={this.refresh} />
           { Object.keys(this.state.markerSnap).length > 0 
               ? Object.keys(this.state.markerSnap).map(key => ( 

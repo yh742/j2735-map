@@ -11,6 +11,7 @@ import SpatLayers from '../MCityCustom/SpatLayers/SpatLayers';
 import { DistanceFromIntersection } from '../MCityCustom/MCityInfo';
 import BufferedMessageClient from '../Helper/BufferedMessageClient';
 import * as actionCreators from '../../store/actions/actions';
+import { SwitchDecoderTopic } from '../Helper/ExternalCalls';
 
 const MAPBOX_TOKEN = window.production.mbToken;
 const MAPBOX_STYLE = window.production.mbStyle;
@@ -60,13 +61,22 @@ class Map extends Component {
   }
 
   componentDidMount() {
+    // set mqtt decoder to decode from "all" topic
+    SwitchDecoderTopic('VZCV2X/1/IN/#', 'json').then((res)=>{
+      if (res.status !== 200) {
+        this.props.addError(`Received code ${res.status} from http server!`)
+        return 
+      }
+    });
+
+    // connect to mqtt broker 
     this.client = new BufferedMessageClient({
       addError: this.props.addError,
       updateMarker: this.props.updateMarker,
       updateNotification: this.props.updateNotification,
       updateSignals: this.props.updateSignals,
       updateSPAT: this.props.updateSPAT
-    }, );
+    });
   }
 
   componentWillUnmount() {
@@ -127,7 +137,7 @@ const mapDispatchToProps = dispatch => {
       addHistory: (history) => dispatch(actionCreators.addHistory(history)),
       pauseAnimation: (onNow, time) => dispatch(actionCreators.pauseAnimation(onNow, time)),
       setAnimation: (on) => dispatch(actionCreators.setAnimation(on)),
-      // for mqtt message 
+      // for dispatching mqtt message 
       addError: (msg) => dispatch(actionCreators.addError(msg)),
       updateMarker: (markers) => dispatch(actionCreators.updateMarkers(markers)),
       updateNotification: (updates) => dispatch(actionCreators.updateNotification(updates)),
