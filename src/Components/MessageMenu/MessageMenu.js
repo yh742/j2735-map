@@ -12,7 +12,8 @@ import TrackingMenu from './TrackingMenu/TrackingMenu';
 import MessageMenuHeader from './MessageMenuHeader/MessageMenuHeader';
 import * as actionCreators from '../../store/actions/actions';
 import { DecodeTopicType } from '../Helper/Utility';
-import MCityTrackingJob from '../MCityCustom/MCityTrackingJob';
+import TrackingJob from '../Helper/TrackingJob';
+import Loading from './Assets/loading.svg';
 
 class MessageMenu extends Component {
   
@@ -20,6 +21,7 @@ class MessageMenu extends Component {
     super(props);
     this.refreshJob = null;
     this.state = {
+      closestIntersection: {},
       loading: false,
       selected: null,
       markerSnap: {},
@@ -33,11 +35,24 @@ class MessageMenu extends Component {
       let res = await this.trackingJob.stop();
       if (!res) return;
       setTimeout(()=> {
-        this.refresh();
         this.props.setMapMode(null, false);
+        this.refresh();
         this.setState({loading: false});
       }, 1000);
     }
+  }
+
+  intervalCallback = (targetId) => {
+    const { markers } = this.props;
+    if (targetId in markers) {
+      const {long, lat } = markers[targetId];
+      this.props.setMapView({
+        longitude: long,
+        latitude: lat,
+        transitionDuration: window.production.animate,
+      });
+    }
+    return;
   }
 
   handleButtonClick = async (evt, key, source) => {
@@ -50,24 +65,30 @@ class MessageMenu extends Component {
       return;
     }
     // (1) pause animation before we move map (2) set this into tracking mode
-    this.props.pauseAnimation(this.props.animationIcons, 300);
-    this.trackingJob = new MCityTrackingJob(
+    this.props.pauseAnimation(this.props.animationIcons, 700);
+    this.props.setMapView({
+      longitude: this.props.markers[key].long, 
+      latitude: this.props.markers[key].lat,
+      bearing: 0,
+      transitionDuration: 0
+    });
+    this.props.setMapMode(key, true);
+    this.setState({loading: true});
+    this.trackingJob = new TrackingJob(
       {
-        intervalCb: this.props.setMapView,
+        intervalCb: ()=> this.intervalCallback(key),
         errorCb: this.props.addError,
       },
-      key,
-      this.props.markers,
+      this.props.markers[key].topic,
       source
     );
-    this.setState({loading: true});
-    this.props.clearMarkers();
     let res = await this.trackingJob.run();
     if (!res) return;
     setTimeout(()=> {
-      this.props.setMapMode(key, true);
+      this.props.clearMarkers();
+      this.refresh();
       this.setState({loading: false})
-    }, 1000);
+    }, 2400);
     this.container.scrollTop = 0;
   }
 
@@ -98,7 +119,8 @@ class MessageMenu extends Component {
     }
   }
 
-  // only re-render component when (1) menu switch states (2) states change while menu is open
+  // only re-render component when 
+  // (1) menu switch states (2) states change while menu is open (3) tracking state changes
   shouldComponentUpdate(nextProps, nextStates) {
     return (this.props.showMenu !== nextProps.showMenu) || 
       ((this.props.showMenu || nextProps.showMenu) && (this.state !== nextStates)) || 
@@ -109,9 +131,15 @@ class MessageMenu extends Component {
     clearInterval(this.refreshJob);
   }
 
+  componentDidUpdate(prevProps) {
+    if (!prevProps.showMenu && this.props.showMenu) {
+      this.refresh();
+    }
+  }
+
   componentDidMount() {
     // refresh the menu every 6 seconds
-    this.refreshJob = setInterval(this.refresh, 6000);
+    this.refreshJob = setInterval(this.refresh, 7000);
   }
 
   // forceUpdate skips shouldComponentUpdate
@@ -128,24 +156,24 @@ class MessageMenu extends Component {
         anchor="right"
         open={showMenu}>
         <div className={classes.toolbarSpacer} />
-        { this.state.loading? <div style={{position: "absolute", display: "inline-block", height: "100vh", width: "100vw", filter: "blur(10px)", zIndex: "100", backgroundColor: "white", opacity: "0.9"}}></div>: null}
+        { this.state.loading? 
+          <><img alt="loading" className={classes.loadingIcon} src={Loading} /><div className={classes.loadingBackground} /></>: null}
         <List dense classes={{root: classes.menuList}} ref={el => this.container = el}>
         { mapMode.tracking? 
-          (<><MessageMenuHeader text="Message Details" button={false} refresh={null} />
-            <TrackingMenu handleStopButtonClick={this.handleStopButtonClick} /></>) : null }
+          <><MessageMenuHeader text="Message Details" button={false} refresh={null} />
+            <TrackingMenu handleStopButtonClick={this.handleStopButtonClick} /></>: null }
           <MessageMenuHeader text="Message Tracker" button={true} refresh={this.refresh} />
-          { Object.keys(this.state.markerSnap).length > 0 
-              ? Object.keys(this.state.markerSnap).map(key => ( 
-                <MessageItem 
-                  key={key} 
-                  id={key}
-                  disable={mapMode.tracking}
-                  selected={key === this.state.selected}
-                  buttonClick={(evt) => this.handleButtonClick(evt, key, DecodeTopicType(this.state.markerSnap[key].topic))}
-                  itemClick={() => this.handleItemClick(key)}
-                  msgType={this.state.markerSnap[key].msgType} 
-                  source={DecodeTopicType(this.state.markerSnap[key].topic)} />))
-              : <EmptyItem tracking={mapMode.tracking} /> }
+          { Object.keys(this.state.markerSnap).length > 0? 
+            Object.keys(this.state.markerSnap).map(key => ( 
+              <MessageItem 
+                key={key} 
+                id={key}
+                disable={mapMode.tracking}
+                selected={key === this.state.selected}
+                buttonClick={(evt) => this.handleButtonClick(evt, key, DecodeTopicType(this.state.markerSnap[key].topic))}
+                itemClick={() => this.handleItemClick(key)}
+                msgType={this.state.markerSnap[key].msgType} 
+                source={DecodeTopicType(this.state.markerSnap[key].topic)} />)): <EmptyItem tracking={mapMode.tracking} /> }
         </List>
       </Drawer>
     );

@@ -70,6 +70,24 @@ const styles = (theme) => ({
       wordWrap: "break-word", 
       whiteSpace: "normal" 
   },
+  loadingIcon: { 
+    margin: "auto", 
+    zIndex: "3", 
+    display: "block", 
+    position: "absolute", 
+    left: "calc(50% - 32px)", 
+    top: "calc(50VH - 32px)"
+  },
+  loadingBackground: {
+    filter: "blur(10px)", 
+    position: "absolute", 
+    display: "inline-block", 
+    height: "100vh", 
+    width: "100vw", 
+    zIndex: "2", 
+    backgroundColor: "white", 
+    opacity: "0.97"
+  }
 });
 
 export default styles;

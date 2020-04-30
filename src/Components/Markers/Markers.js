@@ -18,6 +18,7 @@ const Markers = ({ inViewPort, markers, targetedMarker, popupEnabled, animateIco
             return (
                 <div key={key}>
                 <Marker
+                    ttl={obj.ttl}
                     tracking={tracking}
                     highlight={key === targetedMarker? true: false}
                     popup={popupEnabled}

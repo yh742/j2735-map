@@ -51,7 +51,9 @@ class Map extends Component {
 
   // remove animation transition when user is interacting
   handleInteractions = (iState, tracking) => {
-    if (tracking) return;
+    if (tracking) {
+      return;
+    }
     if ((iState.isDragging || iState.isPanning || iState.isRotating || iState.isZooming) && 
       this.props.animateIcons === true) {
         this.props.setAnimation(false);

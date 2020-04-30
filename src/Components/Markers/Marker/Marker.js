@@ -8,7 +8,7 @@ import CarIcon from '../Assets/Images/car.png';
 import PedIcon from '../Assets/Images/ped.png';
 import {Rotate, ScaleMarker} from '../../Helper/Utility';
 
-const CustomMarker = React.memo(({ classes, tracking, highlight, popup, animateIcons, lat, long, msgType, heading, speed, zoom, mapBearing }) => {
+const CustomMarker = React.memo(({ classes, tracking, highlight, popup, animateIcons, lat, long, msgType, heading, speed, zoom, mapBearing, ttl }) => {
     let markerSize = msgType === "BSM"? 4: 3;
     let markerHeight = ScaleMarker(lat, zoom, markerSize);
     // (146/278) ratio of image dimension of the car, (618/489) ratio of image dimension of the pedestrian
@@ -36,7 +36,9 @@ const CustomMarker = React.memo(({ classes, tracking, highlight, popup, animateI
                 alt="message marker"
                 src={msgType === "BSM"? CarIcon: PedIcon}
                 style={{
-                    filter: highlight? `drop-shadow(0px 0px 15px rgba(255, 255, 255, 1))`: "none",
+                    filter: highlight? `drop-shadow(0px 0px 15px rgba(255, 255, 255, 1))`: 
+                        !highlight && ttl < 2? 'invert(24%) sepia(94%) saturate(7169%) hue-rotate(357deg) brightness(98%) opacity(20%) contrast(114%)': 
+                        "none",
                     opacity: highlight? "1": "0.7",
                     width: markerWidth,
                     height: markerHeight,
