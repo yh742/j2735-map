@@ -3,6 +3,7 @@ export default {
         intNotification: true,
         vehPopup: true,
         stNames: true,
+        highlightTTL: true,
         trajectories: false,
         sigDebug: false,
         metric: false

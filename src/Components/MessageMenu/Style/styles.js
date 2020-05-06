@@ -75,8 +75,8 @@ const styles = (theme) => ({
     zIndex: "3", 
     display: "block", 
     position: "absolute", 
-    left: "calc(50% - 32px)", 
-    top: "calc(50VH - 32px)"
+    left: "calc(50% - 24px)", 
+    top: "calc(50VH - 24px)"
   },
   loadingBackground: {
     filter: "blur(10px)", 
@@ -86,7 +86,7 @@ const styles = (theme) => ({
     width: "100vw", 
     zIndex: "2", 
     backgroundColor: "white", 
-    opacity: "0.97"
+    opacity: "1"
   }
 });
 

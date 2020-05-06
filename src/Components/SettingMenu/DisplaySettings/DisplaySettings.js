@@ -20,6 +20,7 @@ const settingsMap = {
     "trajectories": "Trajectories",
     "sigDebug": "Signal Debug",
     "metric": "Metric Units",
+    'highlightTTL': "Highlight Low TTL"
 };
 
 const DisplaySettings = ({classes, displaySettings, displaySettingToggle}) => {
