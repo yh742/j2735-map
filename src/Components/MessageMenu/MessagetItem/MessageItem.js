@@ -1,4 +1,5 @@
 import React from 'react';
+import clsx from 'clsx';
 import { withStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import ListItem from '@material-ui/core/ListItem';
@@ -13,6 +14,7 @@ const MessageItem = React.memo(({ classes, id, disable, itemClick, buttonClick, 
     return (
         <ListItem 
             button 
+            classes={{root: clsx(disable && classes.noHover)}}
             selected={selected}
             onClick={() => { if(!disable) itemClick(id) }} >
             <ListItemIcon className={classes.listIcon}>

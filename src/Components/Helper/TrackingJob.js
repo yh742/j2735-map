@@ -3,6 +3,7 @@ import { SwitchDecoderTopic } from './ExternalCalls';
 // this can probably be refactored for different types of interval jobs
 class TrackingJob {
     constructor(dispatcher, topic, sourceType) { 
+        console.log(topic);
         this.dispatcher = dispatcher;
         this.topic = topic;
         this.sourceType = sourceType;
@@ -10,7 +11,7 @@ class TrackingJob {
     }
 
     async run() {        
-        // if source is from vehicle subscribe to VZMODE
+        // if the source is from a vehicle subscribe to VZMODE
         if (this.sourceType.toLowerCase() === "vehicle") {
             let splits = this.topic.replace('IN','OUT').split('/');
             if (splits.length < 7) {
@@ -18,9 +19,10 @@ class TrackingJob {
                 return false;
             }
             let newTopic = splits.slice(0,7).join('/') + "/#";
-            let res = await SwitchDecoderTopic(newTopic, "json");
-            if (res.status !== 200) {
-                this.dispatcher.errorCb(`Received code ${res.status} from http server!`);
+            let [inRes, outRes] = await SwitchDecoderTopic(newTopic, "json", this.topic, "json");
+            if (inRes.status !== 200 || outRes.status !== 200) {
+                this.dispatcher.errorCb(`Received ${inRes.status}, ${outRes.status} from http server!`);
+                console.log(inRes, outRes);
                 return false;
             }
         }
@@ -30,9 +32,10 @@ class TrackingJob {
 
     async stop() {
         if (this.sourceType.toLowerCase() === "vehicle") {
-            let res = await SwitchDecoderTopic('VZCV2X/1/IN/#', 'json');
-            if (res.status !== 200) {
-                this.dispatcher.errorCb(`Received code ${res.status} from http server!`);
+            let [inRes, outRes] = await SwitchDecoderTopic('VZCV2X/1/IN/#', 'json', 'NA', 'json');
+            if (inRes.status !== 200 || outRes.status !== 200) {
+                this.dispatcher.errorCb(`Received ${inRes.status}, ${outRes.status} from http server!`);
+                console.log(inRes, outRes);
                 return false;
             }
         }

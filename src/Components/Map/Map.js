@@ -64,10 +64,11 @@ class Map extends Component {
 
   componentDidMount() {
     // set mqtt decoder to decode from "all" topic
-    SwitchDecoderTopic('VZCV2X/1/IN/#', 'json').then((res)=>{
-      if (res.status !== 200) {
-        this.props.addError(`Received code ${res.status} from http server!`)
-        return 
+    SwitchDecoderTopic('VZCV2X/1/IN/#', 'json', "NA", "json").then(([inRes, outRes])=>{
+      if (inRes.status !== 200 || outRes.status !== 200) {
+        this.props.addError(`Received ${inRes.status}, ${outRes.status} from http server!`);
+        console.log(inRes, outRes);
+        return; 
       }
     });
 
@@ -116,7 +117,7 @@ class Map extends Component {
           <NavigationControl />
         </div>
         <Layer {...RoadLabels} layout={{...RoadLabels.layout, "visibility": displayStreets? "visible": "none"}}/>
-        { DistanceFromIntersection("2573", mapView.longitude, mapView.latitude) < 1? <SpatLayers />: null }
+        { mapView.zoom > 16.5? <SpatLayers />: null }
         { mapView.zoom > 16.5 && this.mapRef.current? 
             <Markers inViewPort={(long, lat) => this.mapRef.current.getMap().getBounds().contains([long, lat])} />: null }
       </ReactMapGL>

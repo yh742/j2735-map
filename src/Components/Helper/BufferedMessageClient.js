@@ -164,8 +164,4 @@ export default class BufferedMessageClient {
             }
         };   
     }
-
-    render() {
-        return null;
-    }
 }

@@ -87,6 +87,9 @@ const styles = (theme) => ({
     zIndex: "2", 
     backgroundColor: "white", 
     opacity: "1"
+  },
+  noHover: {
+    pointerEvents: 'none'
   }
 });
 
