@@ -2,7 +2,7 @@ import mqtt from 'mqtt';
 import { ParseLocation, ParseHeading, ParseSpeed } from './Utility';
 
 export default class BufferedMessageClient {
-    constructor(dispatchers, timerInterval=window.production.animate) {
+    constructor(displayErrors) {
         this.msgBuffer = {};
         this.spatLightsBuffer = {};
         // make sure keepalive here is less than 60 seconds
@@ -16,28 +16,26 @@ export default class BufferedMessageClient {
             this.client.subscribe(window.production.topic, (err) => {
                 if (err) {
                     console.log("couldn't subscribe to mqtt server");
-                    dispatchers.addError("Couldn't subscribe to MQTT server!");
+                    displayErrors("Couldn't subscribe to MQTT server!");
                     return;
                 }
                 this.client.on("message", this.handleMqttMessages);
             });
             this.client.on("disconnect", () => {
                 console.log("mqtt broker is disconnecting");
-                dispatchers.addError("Disconnecting from MQTT server!");
+                displayErrors("Disconnecting from MQTT server!");
             });
         });
-        this.interval = setInterval(() => this.intervalJob(dispatchers), timerInterval);
     }
 
-    intervalJob(dispatchers) {
+    dispatchMessages(dispatchers) {
         dispatchers.updateNotification(Object.keys(this.msgBuffer));
-        dispatchers.updateSignals(this.spatLightsBuffer);
         dispatchers.updateMarker(this.msgBuffer);
-        this.clearBuffer()
+        this.msgBuffer = {};
     }
 
-    clearBuffer() {
-        this.msgBuffer = {};
+    dispatchSignals(dispatchers) {
+        dispatchers.updateSignals(this.spatLightsBuffer);
         this.spatLightsBuffer = {};
     }
 
@@ -135,30 +133,25 @@ export default class BufferedMessageClient {
                 minEndTime: mState["state-time-speed"].MovementEvent.timing? mState["state-time-speed"].MovementEvent.timing.minEndTime/10: -1,
             };
         }); 
-        this.spatLightsBuffer = {
-            [id]: {
-                greens: greens,
-                yellows: yellows,
-                reds: reds,
-                ttl: window.production.spatTTL,
-            }
+        this.spatLightsBuffer[id] = {
+            greens: greens,
+            yellows: yellows,
+            reds: reds,
+            ttl: window.production.spatTTL,
         };
     }
 
     convertMessages = (msgObj, topic, msgType) => {
         const { heading, id, long, lat, speed } = msgObj;
         let cleanId = id.replace(/[^a-z0-9]|\s+|\r?\n|\r/gmi, "");
-        this.msgBuffer = {
-            ...this.msgBuffer,
-            [cleanId]: {
-                topic: topic,
-                msgType: msgType,
-                long: ParseLocation(long), 
-                lat: ParseLocation(lat),
-                speed: ParseSpeed(speed),
-                heading: ParseHeading(heading),
-                ttl: window.production.ttl,
-            }
+        this.msgBuffer[cleanId] = {
+            topic: topic,
+            msgType: msgType,
+            long: ParseLocation(long), 
+            lat: ParseLocation(lat),
+            speed: ParseSpeed(speed),
+            heading: ParseHeading(heading),
+            ttl: window.production.ttl,
         };   
     }
 }

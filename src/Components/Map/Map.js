@@ -73,13 +73,14 @@ class Map extends Component {
     });
 
     // connect to mqtt broker 
-    this.client = new BufferedMessageClient({
-      addError: this.props.addError,
+    this.client = new BufferedMessageClient(this.props.addError);
+    this.msgPublisher = setInterval(() => this.client.dispatchMessages({
       updateMarker: this.props.updateMarker,
       updateNotification: this.props.updateNotification,
+    }), window.production.animate);
+    this.spatPublisher = setInterval(() => this.client.dispatchSignals({
       updateSignals: this.props.updateSignals,
-      updateSPAT: this.props.updateSPAT
-    });
+    }), window.production.spatFreq);
   }
 
   componentWillUnmount() {
