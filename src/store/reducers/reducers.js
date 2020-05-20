@@ -1,21 +1,34 @@
 import initialStates from './initialStates';
 import * as actionTypes from '../actions/actionTypes';
 
+const updateTTL = (markers) => {
+    let updatedTTL = {};
+    for (const key in markers) {
+        if (markers[key].ttl - 1 !== 0) {
+            updatedTTL[key] = {
+                ...markers[key],
+                ttl: markers[key].ttl - 1,
+            }
+        }   
+    }
+    return updatedTTL;
+}
+
 const reducer = (state = initialStates, action) => {
     switch (action.type) {
-        case actionTypes.UPDATE_SPAT:
-            return {
-                ...state,
-                spat: {
-                    ...state.spat,
-                    ...action.payload
-                }
-            };
+        // case actionTypes.UPDATE_SPAT:
+        //     return {
+        //         ...state,
+        //         spat: {
+        //             ...state.spat,
+        //             ...action.payload
+        //         }
+        //     };
         case actionTypes.UPDATE_SIGNALS:
             return {
                 ...state,
                 signals: {
-                    ...state.signals,
+                    ...updateTTL(state.signals),
                     ...action.payload
                 }
             };
@@ -25,19 +38,19 @@ const reducer = (state = initialStates, action) => {
                 markers: {}
             };
         case actionTypes.UPDATE_MARKER:
-            let updatedTTL = {};
-            for (const key in state.markers) {
-                if (state.markers[key].ttl - 1 !== 0) {
-                    updatedTTL[key] = {
-                        ...state.markers[key],
-                        ttl: state.markers[key].ttl - 1,
-                    }
-                }   
-            }
+            //let updatedTTL = {};
+            // for (const key in state.markers) {
+            //     if (state.markers[key].ttl - 1 !== 0) {
+            //         updatedTTL[key] = {
+            //             ...state.markers[key],
+            //             ttl: state.markers[key].ttl - 1,
+            //         }
+            //     }   
+            // }
             return {
                 ...state,
                 markers: {
-                    ...updatedTTL,
+                    ...updateTTL(state.markers),
                     ...action.payload
                 }
             };

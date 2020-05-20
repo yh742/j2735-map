@@ -117,7 +117,15 @@ class Map extends Component {
           <NavigationControl />
         </div>
         <Layer {...RoadLabels} layout={{...RoadLabels.layout, "visibility": displayStreets? "visible": "none"}}/>
-        { mapView.zoom > 16.5? <SpatLayers />: null }
+        { DistanceFromIntersection("2573", mapView.longitude, mapView.latitude) < 1? 
+          <>
+            <SpatLayers key="2570" id="2570" />
+            <SpatLayers key="2571" id="2571" />
+            <SpatLayers key="2572" id="2572" />
+            <SpatLayers key="2573" id="2573" />
+            <SpatLayers key="2576" id="2576" />
+            <SpatLayers key="2577" id="2577" />
+          </>: null }
         { mapView.zoom > 16.5 && this.mapRef.current? 
             <Markers inViewPort={(long, lat) => this.mapRef.current.getMap().getBounds().contains([long, lat])} />: null }
       </ReactMapGL>

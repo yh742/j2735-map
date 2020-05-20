@@ -3,7 +3,6 @@ import { SwitchDecoderTopic } from './ExternalCalls';
 // this can probably be refactored for different types of interval jobs
 class TrackingJob {
     constructor(dispatcher, topic, sourceType) { 
-        console.log(topic);
         this.dispatcher = dispatcher;
         this.topic = topic;
         this.sourceType = sourceType;
@@ -19,7 +18,7 @@ class TrackingJob {
                 return false;
             }
             let newTopic = splits.slice(0,7).join('/') + "/#";
-            let [inRes, outRes] = await SwitchDecoderTopic(newTopic, "json", this.topic, "json");
+            let [inRes, outRes] = await SwitchDecoderTopic(this.topic, "json", newTopic, "json");
             if (inRes.status !== 200 || outRes.status !== 200) {
                 this.dispatcher.errorCb(`Received ${inRes.status}, ${outRes.status} from http server!`);
                 console.log(inRes, outRes);

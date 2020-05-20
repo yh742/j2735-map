@@ -36,9 +36,6 @@ export default {
         message: "",
         queue: [],
     },
-    signals: {
-        greens:[],
-        reds:[],
-        yellows:[]
+    signals: { 
     },
 };

@@ -13,24 +13,34 @@ function signalPropsEqual(prevProps, nextProps) {
         Compare(prevProps.reds, nextProps.reds)
 }
 
-const SpatLayer = React.memo(({ greens, yellows, reds }) => {
+const SpatLayer = React.memo(({ id, greens, yellows, reds }) => {
     return (
         <>
-            <Layer {...GreenSignal} filter={["all", ["in", "group", ...greens ]]} />
-            <Layer {...YellowSignal} filter={["all", ["in", "group", ...yellows ]]} />
-            <Layer {...RedSignal} filter={["all", ["in", "group", ...reds ]]} />
-            <Layer {...GreenTrajectory} filter={["all", ["in", "group", ...greens ]]} />
-            <Layer {...YellowTrajectory} filter={["all", ["in", "group", ...yellows ]]} />
+            <Layer {...GreenSignal} key={id + "green"} filter={["all", ["==", "intId", id], ["in", "group", ...greens ]]} />
+            <Layer {...YellowSignal} key={id + "yellow"} filter={["all", ["==", "intId", id], ["in", "group", ...yellows ]]} />
+            <Layer {...RedSignal} key={id + "red"} filter={["all", ["==", "intId", id], ["in", "group", ...reds ]]} />
+            <Layer {...GreenTrajectory} key={id + "green-traj"} filter={["all", ["==", "intId", id], ["in", "group", ...greens ]]} />
+            <Layer {...YellowTrajectory} key={id + "yellow-traj"} filter={["all", ["==", "intId", id], ["in", "group", ...yellows ]]} />
         </>
     );
 }, signalPropsEqual);
 
-const mapStateToProps = state => {
-    return {
-        reds: state.signals.reds,
-        greens: state.signals.greens,
-        yellows: state.signals.yellows
-    };
+const mapStateToProps = (state, ownProps) => {
+    const { id } = ownProps;
+    if (id in state.signals) {
+        return {
+            reds: state.signals[id].reds,
+            greens: state.signals[id].greens,
+            yellows: state.signals[id].yellows
+        };
+    } else {
+        return {
+            reds: [],
+            greens: [],
+            yellows: []
+        };
+    }
+
 }
 
 export default connect(mapStateToProps, null)(SpatLayer);

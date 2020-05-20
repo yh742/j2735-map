@@ -5,7 +5,6 @@ export default class BufferedMessageClient {
     constructor(dispatchers, timerInterval=window.production.animate) {
         this.msgBuffer = {};
         this.spatLightsBuffer = {};
-        this.spatMessagesBuffer = {};
         // make sure keepalive here is less than 60 seconds
         this.client = mqtt.connect(window.production.server, {
             port: window.production.port,
@@ -32,16 +31,14 @@ export default class BufferedMessageClient {
 
     intervalJob(dispatchers) {
         dispatchers.updateNotification(Object.keys(this.msgBuffer));
-        dispatchers.updateMarker(this.msgBuffer);
-        dispatchers.updateSPAT(this.spatMessagesBuffer);
         dispatchers.updateSignals(this.spatLightsBuffer);
+        dispatchers.updateMarker(this.msgBuffer);
         this.clearBuffer()
     }
 
     clearBuffer() {
         this.msgBuffer = {};
         this.spatLightsBuffer = {};
-        this.spatMessagesBuffer = {};
     }
 
     disconnect() {
@@ -77,8 +74,9 @@ export default class BufferedMessageClient {
           );
         } else if ("SPAT" in jsonObj.MessageFrame.value) {
             this.convertSpatMessages(
+                jsonObj.MessageFrame.value.SPAT.intersections.IntersectionState.id.id,
                 jsonObj.MessageFrame.value.SPAT.intersections.IntersectionState.states.MovementState,
-            )
+            );
         } else {
             console.log("can't convert: ", jsonObj)
         }
@@ -102,7 +100,7 @@ export default class BufferedMessageClient {
         }
     }
 
-    convertSpatMessages = (movementStates) => {
+    convertSpatMessages = (id, movementStates) => {
         let pubObj = {};
         let greens = [];
         let yellows =[];
@@ -137,14 +135,13 @@ export default class BufferedMessageClient {
                 minEndTime: mState["state-time-speed"].MovementEvent.timing? mState["state-time-speed"].MovementEvent.timing.minEndTime/10: -1,
             };
         }); 
-        this.spatMessagesBuffer = {
-            ...this.spatMessagesBuffer,
-            ...pubObj,
-        };
         this.spatLightsBuffer = {
-            greens: greens,
-            yellows: yellows,
-            reds: reds,
+            [id]: {
+                greens: greens,
+                yellows: yellows,
+                reds: reds,
+                ttl: window.production.spatTTL,
+            }
         };
     }
 

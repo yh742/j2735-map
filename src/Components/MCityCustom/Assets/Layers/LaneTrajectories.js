@@ -1,10 +1,9 @@
 export const GreenTrajectory = {
-    "id": "state-main-traj-green",
     "type": "symbol",
     "metadata": {"mapbox:group": "3493ee614896046c26b77953c80175b9"},
     "source": "composite",
-    "source-layer": "state-main-traj",
-    "minzoom": 18,
+    "source-layer": "mcity-traj-95yj0j",
+    "minzoom": 17,
     "filter": ["any"],
     "layout": {
         "icon-image": "green-arrow",
@@ -14,8 +13,8 @@ export const GreenTrajectory = {
             ["zoom"],
             0,
             0,
-            18,
-            0.6,
+            17,
+            0.4,
             22,
             1.2
         ],
@@ -28,7 +27,7 @@ export const GreenTrajectory = {
             "interpolate",
             ["linear"],
             ["zoom"],
-            18,
+            17,
             20,
             22,
             40
@@ -38,12 +37,11 @@ export const GreenTrajectory = {
 };
 
 export const YellowTrajectory = {
-    "id": "state-main-traj-yellow",
     "type": "symbol",
     "metadata": {"mapbox:group": "3493ee614896046c26b77953c80175b9"},
     "source": "composite",
-    "source-layer": "state-main-traj",
-    "minzoom": 18,
+    "source-layer": "mcity-traj-95yj0j",
+    "minzoom": 17,
     "filter": ["any"],
     "layout": {
         "icon-image": "yellow-arrow",
@@ -53,8 +51,8 @@ export const YellowTrajectory = {
             ["zoom"],
             0,
             0,
-            18,
-            0.6,
+            17,
+            0.4,
             22,
             1.2
         ],
@@ -67,7 +65,7 @@ export const YellowTrajectory = {
             "interpolate",
             ["linear"],
             ["zoom"],
-            18,
+            17,
             20,
             22,
             40
@@ -77,12 +75,11 @@ export const YellowTrajectory = {
 };
 
 export const RedTrajectory = {
-    "id": "state-main-traj-red",
     "type": "symbol",
     "metadata": {"mapbox:group": "3493ee614896046c26b77953c80175b9"},
     "source": "composite",
-    "source-layer": "state-main-traj",
-    "minzoom": 18,
+    "source-layer": "mcity-traj-95yj0j",
+    "minzoom": 17,
     "filter": ["any"],
     "layout": {
         "icon-image": "red-arrow",
@@ -92,8 +89,8 @@ export const RedTrajectory = {
             ["zoom"],
             0,
             0,
-            18,
-            0.6,
+            17,
+            0.4,
             22,
             1.2
         ],
@@ -106,7 +103,7 @@ export const RedTrajectory = {
             "interpolate",
             ["linear"],
             ["zoom"],
-            18,
+            17,
             20,
             22,
             40
