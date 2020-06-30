@@ -33,7 +33,7 @@ export function ScaleMarker(lat, zoom, size) {
 
 export function DecodeTopicType(topic) {
     if (topic === null) return "";
-    let cleanTopic = topic.toUpperCase().replace("VZCV2X/1/IN/", "");
+    let cleanTopic = topic.toUpperCase().replace("VZCV2X/2/IN/", "");
     let splits = cleanTopic.split('/');
     if (splits.length === 0) return "";
     switch (splits[0]) {

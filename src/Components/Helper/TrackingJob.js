@@ -31,7 +31,7 @@ class TrackingJob {
 
     async stop() {
         if (this.sourceType.toLowerCase() === "vehicle") {
-            let [inRes, outRes] = await SwitchDecoderTopic('VZCV2X/1/IN/#', 'json', 'NA', 'json');
+            let [inRes, outRes] = await SwitchDecoderTopic(window.production.defaultTopic, 'json', 'NA', 'json');
             if (inRes.status !== 200 || outRes.status !== 200) {
                 this.dispatcher.errorCb(`Received ${inRes.status}, ${outRes.status} from http server!`);
                 console.log(inRes, outRes);

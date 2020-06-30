@@ -3,7 +3,8 @@ const DRAWER_WIDTH = 260;
 const styles = (theme) => ({
   drawerPaper: {
     height: "100vh",
-    overflow: "scroll",
+    border: "0px",
+    overflow: "auto",
     position: 'relative',
     whiteSpace: 'nowrap',
     width: DRAWER_WIDTH,
@@ -21,7 +22,7 @@ const styles = (theme) => ({
   },
   menuList: {
     position: "relative", 
-    overflow:"auto", 
+    overflow: "unset", 
     backgroundColor: "white", 
     padding: "0px"
   },
@@ -48,7 +49,7 @@ const styles = (theme) => ({
   refreshButton: {
       fontSize: '9px',
       minWidth: '0px',
-      marginLeft: theme.spacing(6),
+      marginLeft: theme.spacing(5),
       paddingLeft: theme.spacing(1),
       paddingRight: theme.spacing(1),
   },

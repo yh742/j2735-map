@@ -64,7 +64,7 @@ class Map extends Component {
 
   componentDidMount() {
     // set mqtt decoder to decode from "all" topic
-    SwitchDecoderTopic('VZCV2X/1/IN/#', 'json', "NA", "json").then(([inRes, outRes])=>{
+    SwitchDecoderTopic(window.production.defaultTopic, 'json', "NA", "json").then(([inRes, outRes])=>{
       if (inRes.status !== 200 || outRes.status !== 200) {
         this.props.addError(`Received ${inRes.status}, ${outRes.status} from http server!`);
         console.log(inRes, outRes);
